@@ -30,12 +30,21 @@ const Signin = ({ navigation }) => {
     //  .then(userCredentials => {
     //    const user = userCredentials.user;
     //    console.log('Log in with: ', user.email);
-    //    navigation.navigate('OnBording')
+    //    const userRef = firebase.database().ref('users/' + userId);
+          //userRef.once('value').then(snapshot => {
+      //const userData = snapshot.val();
+      //if (userData && userData.hasCompletedOnboarding) {
+        // If the user has completed onboarding, navigate to the main card page
+      //  navigation.navigate('MainCard');
+      //} else {
+        // If the user hasn't completed onboarding, navigate to the onboarding page
+      //  navigation.navigate('Onboarding');
     //  })
 //
     //  .catch(error => alert(error.message))
     if(email == 'test@gmail.com' && password == '123456'){
-      alert('Welcome')
+      
+      navigation.navigate('OnBording');
       
     }else {
       alert('Wrong')

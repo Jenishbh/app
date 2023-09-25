@@ -11,12 +11,12 @@ import Registration from "../screens/Welcome/Signup";
 //import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 //import Icon from 'react-native-vector-icons/MaterialIcons';
 //import Con from 'react-native-vector-icons/Octicons';
-//import Menucard from '../screens/Customer/Menucard';
+import Menucard from '../screens/Customer/Menucard';
 //import Reservation from '../screens/Customer/Reservation'
 //import Manager_home from '../screens/Manager/Manager_home';
 //
 //import DetailsScreen from '../screens/Customer/detailsScreen';
-//import OnBording from '../screens/Customer/OnBording';
+import OnBording from '../screens/Customer/OnBording';
 //import Signin from '../screens/Welcome/Signin';
 //import Profile from '../screens/Customer/Profile'
 //import Manager_Menu from '../screens/Manager/Manager_menu';
@@ -50,6 +50,8 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='Signin' component={Login} options={{headerShown: false}} />
          <Stack.Screen name='Signup' component={Registration} options={{headerShown: false}} />
          <Stack.Screen name='Forgot_pass' component={Forget_pass} options={{headerShown: false}} />
+         <Stack.Screen name='OnBording' component={OnBording} options={{headerShown: false}} />
+         <Stack.Screen name='Menucard' component={Menucard} options={{headerShown: false}} />
          
         
         
