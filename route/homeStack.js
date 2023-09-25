@@ -2,7 +2,7 @@ import React from 'react'
 import 'react-native-gesture-handler'
 import { createStackNavigator } from "@react-navigation/stack"; ``
 import Login from '../screens/Welcome/Login';
-////import Forget_pass from "../screens/Welcome/Forget_pass";
+import Forget_pass from "../screens/Welcome/Forget_pass";
 import Registration from "../screens/Welcome/Signup";
 //import customer_home from '../screens/Customer/customer_home';
 //import { SafeAreaView } from 'react-navigation';
@@ -49,6 +49,7 @@ const AuthNavigator = ()=>(
 
          <Stack.Screen name='Signin' component={Login} options={{headerShown: false}} />
          <Stack.Screen name='Signup' component={Registration} options={{headerShown: false}} />
+         <Stack.Screen name='Forgot_pass' component={Forget_pass} options={{headerShown: false}} />
          
         
         
