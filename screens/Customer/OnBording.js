@@ -3,7 +3,7 @@ import React from 'react'
 import { PrimaryButton } from '../../components/Button';
 import { useNavigation } from '@react-navigation/native';
 
-const navigation = useNavigation();
+
 const {width} = Dimensions.get('window');
 // Example: Updating user data after completing onboarding
 // This is just a conceptual example, adapt it to your actual database and data structure
@@ -15,10 +15,7 @@ function DoneOnbording ()  {
    // const userRef = firebase.database().ref('users/' + userId);
    // userRef.update({ hasCompletedOnboarding: true });
 }
-const handlePress = () => {
-    navigation.navigate('Menucard'); // Navigate to Customer_main screen
-    DoneOnbording(); // Call DoneOnboarding function
-  };
+
 
 const onboarding_screens = [
     {
@@ -45,7 +42,10 @@ const onboarding_screens = [
 const OnBording= ({navigation}) =>{
 
     const scrollX = React.useRef (new Animated.Value(0)).current
-
+    const handlePress = () => {
+        navigation.navigate('Menucard'); // Navigate to Customer_main screen
+        //DoneOnbording(); // Call DoneOnboarding function
+      };
     
 
     const Dots=()=>{
@@ -130,7 +130,7 @@ const OnBording= ({navigation}) =>{
                         width:280,
                         borderRadius:40
                     }}
-                    onPress={()=> navigation.navigate('Menucard')} />
+                    onPress={handlePress} />
 
                    
                     
@@ -162,7 +162,8 @@ const OnBording= ({navigation}) =>{
                     [
                         {nativeEvent: {contentOffset: { x:scrollX}
                         }}
-                    ]
+                    ], 
+                    {useNativeDriver: false}
                 )}
                 
                 keyExtractor={(item)=>`${item.id}` }
