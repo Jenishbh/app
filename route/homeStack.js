@@ -31,7 +31,7 @@ import ReservationHome from '../screens/Customer/ReservationHome';
 import ReservationDetails from '../screens/Customer/ReservationDetails';
 //import Confirm_res from '../screens/Customer/confirm_res';
 //import Dashboard from '../screens/Manager/dash/dashboard';
-//import CartScreen from '../screens/Customer/CartScreen';
+import CartScreen from '../screens/Customer/CartScreen';
 //
 //import Scanner from '../screens/Manager/BarCodeScanPage';
 //import TakeOrder from '../screens/Manager/OrderTakenPage';
@@ -84,7 +84,7 @@ const BottomNavigator = ({navigation}) => {
       />
       <Tab.Screen
         name="Cart"
-        component={Menucard}
+        component={CartScreen}
         options={{
           tabBarIcon: (color) => (
             <View style={{
@@ -145,6 +145,7 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='ReservationHome' component={ReservationHome} options={{headerShown: false}} />
          <Stack.Screen name='ReservationDetails' component={ReservationDetails} options={{headerShown: false}} />
          <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}} />
+         <Stack.Screen name='CartScreen' component={CartScreen} options={{headerShown: false}} />
          
         
         
