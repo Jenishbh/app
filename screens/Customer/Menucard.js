@@ -114,7 +114,7 @@ function Menucard({navigation}) {
         <TouchableHighlight 
         underlayColor={'white'} 
         activeOpacity={0.9} 
-        onPress={()=> navigation.navigate('detailsScreen', food)}
+        onPress={()=> navigation.navigate('DetailsScreen', food)}
         >
 
         <View style ={style.card}>

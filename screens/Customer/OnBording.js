@@ -43,7 +43,7 @@ const OnBording= ({navigation}) =>{
 
     const scrollX = React.useRef (new Animated.Value(0)).current
     const handlePress = () => {
-        navigation.navigate('Menucard'); // Navigate to Customer_main screen
+        navigation.navigate('Home'); // Navigate to Customer_main screen
         //DoneOnbording(); // Call DoneOnboarding function
       };
     

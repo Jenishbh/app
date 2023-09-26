@@ -7,15 +7,15 @@ import Registration from "../screens/Welcome/Signup";
 //import customer_home from '../screens/Customer/customer_home';
 //import { SafeAreaView } from 'react-navigation';
 //import { NavigationContainer } from '@react-navigation/native';
-//import { tabBarOption, Image, View } from 'react-native'
-//import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-//import Icon from 'react-native-vector-icons/MaterialIcons';
-//import Con from 'react-native-vector-icons/Octicons';
+import {  View } from 'react-native'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Con from 'react-native-vector-icons/Octicons';
 import Menucard from '../screens/Customer/Menucard';
 //import Reservation from '../screens/Customer/Reservation'
 //import Manager_home from '../screens/Manager/Manager_home';
 //
-//import DetailsScreen from '../screens/Customer/detailsScreen';
+import DetailsScreen from '../screens/Customer/detailsScreen';
 import OnBording from '../screens/Customer/OnBording';
 //import Signin from '../screens/Welcome/Signin';
 //import Profile from '../screens/Customer/Profile'
@@ -42,6 +42,94 @@ import OnBording from '../screens/Customer/OnBording';
 //
 //
 const Stack= createStackNavigator();
+const Tab = createBottomTabNavigator();
+const BottomNavigator = ({navigation}) => {
+  return (
+    <Tab.Navigator  tabBarOption={{
+      style: {
+        height: 55,
+        borderTopWidth: 0,
+        elevation: 0,
+      },
+      showLabel: false,
+      activeTintColor: 'orange',
+      
+
+    }} >
+      <Tab.Screen name="Menu"
+        component={Menucard}
+        options={{
+          tabBarIcon: () => (
+            <Icon name='restaurant'
+              color='orange'
+              size={28}
+
+            />
+          ),
+          headerShown: false
+        }}
+      />
+      <Tab.Screen
+        name="ReservationHome"
+        component={Menucard}
+        options={{
+          tabBarIcon: (color) => (
+            <Icon name="date-range"
+              color={color}
+              size={28}
+            />
+          ),
+          headerShown: false
+        }}
+      />
+      <Tab.Screen
+        name="Cart"
+        component={Menucard}
+        options={{
+          tabBarIcon: (color) => (
+            <View style={{
+              height: 50, width: 60,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'white',
+              borderColor: 'orange',
+              borderWidth: 2,
+              borderRadius: 30,
+              top: -25,
+              elevation: 5,
+              }}>
+                 <Icon name="shopping-cart" color={color} size={28} />
+            </View>
+          ),
+          headerShown: false
+        }} 
+      />
+      <Tab.Screen
+        name="Profile"
+        component={Menucard}
+        options={{
+          tabBarIcon: (color) => (
+            <Icon name="face"
+              color={color}
+              size={28} />
+          ),
+          headerShown: false
+        }} 
+      />
+      <Tab.Screen
+        name="About"
+        component={Login}
+        options={{
+          tabBarIcon: (color) => (
+            <Con name="question"
+              color={color}
+              size={28} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  )
+}
 
 const AuthNavigator = ()=>(
     
@@ -52,6 +140,8 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='Forgot_pass' component={Forget_pass} options={{headerShown: false}} />
          <Stack.Screen name='OnBording' component={OnBording} options={{headerShown: false}} />
          <Stack.Screen name='Menucard' component={Menucard} options={{headerShown: false}} />
+         <Stack.Screen name='DetailsScreen' component={DetailsScreen} options={{headerShown: false}} />
+         <Stack.Screen name='Home' component={BottomNavigator} options={{headerShown: false}} />
          
         
         
