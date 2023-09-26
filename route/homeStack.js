@@ -18,7 +18,7 @@ import Menucard from '../screens/Customer/Menucard';
 import DetailsScreen from '../screens/Customer/detailsScreen';
 import OnBording from '../screens/Customer/OnBording';
 //import Signin from '../screens/Welcome/Signin';
-//import Profile from '../screens/Customer/Profile'
+import Profile from '../screens/Customer/Profile'
 //import Manager_Menu from '../screens/Manager/Manager_menu';
 //import Revenue from '../screens/Manager/Revenue';
 //import Waitinglist from '../screens/Manager/Waiting_list';
@@ -27,8 +27,8 @@ import OnBording from '../screens/Customer/OnBording';
 //import Signup from '../screens/Welcome/Signup';
 //import Otp from '../screens/Welcome/Otp';
 //import Tabnavigator from '../screens/Manager/Tabnavigator';
-//import ReservationHome from '../screens/Customer/ReservationHome';
-//import ReservationDetails from '../screens/Customer/ReservationDetails';
+import ReservationHome from '../screens/Customer/ReservationHome';
+import ReservationDetails from '../screens/Customer/ReservationDetails';
 //import Confirm_res from '../screens/Customer/confirm_res';
 //import Dashboard from '../screens/Manager/dash/dashboard';
 //import CartScreen from '../screens/Customer/CartScreen';
@@ -71,7 +71,7 @@ const BottomNavigator = ({navigation}) => {
       />
       <Tab.Screen
         name="ReservationHome"
-        component={Menucard}
+        component={ReservationHome}
         options={{
           tabBarIcon: (color) => (
             <Icon name="date-range"
@@ -106,7 +106,7 @@ const BottomNavigator = ({navigation}) => {
       />
       <Tab.Screen
         name="Profile"
-        component={Menucard}
+        component={Profile}
         options={{
           tabBarIcon: (color) => (
             <Icon name="face"
@@ -142,6 +142,9 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='Menucard' component={Menucard} options={{headerShown: false}} />
          <Stack.Screen name='DetailsScreen' component={DetailsScreen} options={{headerShown: false}} />
          <Stack.Screen name='Home' component={BottomNavigator} options={{headerShown: false}} />
+         <Stack.Screen name='ReservationHome' component={ReservationHome} options={{headerShown: false}} />
+         <Stack.Screen name='ReservationDetails' component={ReservationDetails} options={{headerShown: false}} />
+         <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}} />
          
         
         
