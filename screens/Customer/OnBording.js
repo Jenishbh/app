@@ -1,7 +1,11 @@
-import { Text, View,  Image, Animated, SafeAreaView, Dimensions, ImageBackground,TextButton } from 'react-native'
+import { Text, View,  Image, Animated, SafeAreaView, Dimensions, ImageBackground } from 'react-native'
 import React from 'react'
 import { PrimaryButton } from '../../components/Button';
 import { useNavigation } from '@react-navigation/native';
+import firebase from 'firebase/app';
+import {auth, database} from '../../database/firebase';
+
+
 
 
 const {width} = Dimensions.get('window');
@@ -9,12 +13,7 @@ const {width} = Dimensions.get('window');
 // This is just a conceptual example, adapt it to your actual database and data structure
 
 
-function DoneOnbording ()  {
-    //we have to integrate real time user
-    //const userId = '123'; // This is the user ID from your database
-   // const userRef = firebase.database().ref('users/' + userId);
-   // userRef.update({ hasCompletedOnboarding: true });
-}
+
 
 
 const onboarding_screens = [
@@ -42,9 +41,27 @@ const onboarding_screens = [
 const OnBording= ({navigation}) =>{
 
     const scrollX = React.useRef (new Animated.Value(0)).current
-    const handlePress = () => {
-        navigation.navigate('Home'); // Navigate to Customer_main screen
-        //DoneOnbording(); // Call DoneOnboarding function
+    const [loading, setLoading] = React.useState(false);
+    const handleDone = async () => {
+        try {
+          setLoading(true);
+          if (!database) {
+            console.error('Firebase is not properly initialized');
+            return;
+          }
+          
+          const user = auth.currentUser;
+          if (user) {
+            const encodedEmail = user.email.replace('@', '_at_').replace(/\./g, '_dot_');
+            const userRef = database.ref('users/' + encodedEmail);
+            await userRef.update({ hasCompletedOnboarding: true });
+            navigation.navigate('Home'); // Navigate to the main app screen after updating the user data
+          } else {
+            console.error('No user is signed in');
+          }
+        } catch (error) {
+          console.error('Error updating user data: ', error);
+        } finally { setLoading (false) }
       };
     
 
@@ -130,7 +147,7 @@ const OnBording= ({navigation}) =>{
                         width:280,
                         borderRadius:40
                     }}
-                    onPress={handlePress} />
+                    onPress={handleDone} disabled={loading} />
 
                    
                     

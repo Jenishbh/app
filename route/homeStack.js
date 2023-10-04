@@ -29,10 +29,10 @@ import Profile from '../screens/Customer/Profile'
 //import Tabnavigator from '../screens/Manager/Tabnavigator';
 import ReservationHome from '../screens/Customer/ReservationHome';
 import ReservationDetails from '../screens/Customer/ReservationDetails';
-//import Confirm_res from '../screens/Customer/confirm_res';
+
 //import Dashboard from '../screens/Manager/dash/dashboard';
 import CartScreen from '../screens/Customer/CartScreen';
-//
+import Confirm_res from '../screens/Customer/Confirm_res';
 //import Scanner from '../screens/Manager/BarCodeScanPage';
 //import TakeOrder from '../screens/Manager/OrderTakenPage';
 //import CheckOut from '../screens/Manager/CheckOutPage';
@@ -146,6 +146,7 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='ReservationDetails' component={ReservationDetails} options={{headerShown: false}} />
          <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}} />
          <Stack.Screen name='CartScreen' component={CartScreen} options={{headerShown: false}} />
+         <Stack.Screen name='Confirm_res' component={Confirm_res} options={{headerShown: false}} />
          
         
         

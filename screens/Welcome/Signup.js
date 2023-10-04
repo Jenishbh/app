@@ -4,9 +4,9 @@ import React from 'react'
 import FormInput from '../../components/FormInput'
 import utils from '../../api/utils'
 import { PrimaryButton, SecondButton } from '../../components/Button'
-//import firebase from 'firebase/compat';
-//import {db,auth} from '../../database/firebase'
 
+import {db,auth} from '../../database/firebase'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 
 
@@ -40,40 +40,36 @@ const Signup = ({navigation}) =>{
     //    }
         
 
-    const handleSignup = () =>{  
+    const handleSignup = async () =>{  
         //handle sigup
+        try{
         if(email === '' && password === '') {
           Alert.alert('Enter details to signup!')
+          return;
         } 
-        else {
-         // firebase.auth().createUserWithEmailAndPassword(email, password)
-         // .then((userCredential) => {
-          // Signed up
-          //const user = userCredential.user;
-         // signInWithPhoneNumber;
-          console.log('Signup successfully with: ',user.email) ;
-         //})
-          //.catch((error) => 
-          //alert(error.message));
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+          //signInWithPhoneNumber;
+          console.log('Signup successfully with: ',userCredential.user.email) ;
             
           
   
-         // db
-         // .collection('UserData')
-         // .doc(email)
-         // .set({
-         //   name: username,
-         //   phone: phone,
-         //   email: email
-         // })
-       // .then(()=>{
-         // console.log('User added!')
-       // })
-      //.catch((error)=> alert(error.message))
-  
+          await db
+          .collection('UserData')
+          .doc(email)
+          .set({
+            name: username,
+            phone: phone,
+            email: email
+          })
+        
+          console.log('User added!')
           navigation.navigate('Signin')
         }
+            catch(error) {alert('Error adding user data: ',error.message)
   
+          
+        }
+        
         
       }
 

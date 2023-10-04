@@ -3,8 +3,8 @@ import { View,Image, Text, StyleSheet,  TextInput, ScrollView, TouchableOpacity,
 import {PrimaryButton} from "../../components/Button";
 import Watch from '../Menu/Time';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-//import {db} from '../../database/firebase'
-//import { getAuth } from "firebase/auth";
+import {db,auth} from '../../database/firebase'
+
 import Table from "../Menu/Table";
 //import firebase from "firebase/compat";
 //import { Manager_db } from '../../database/ManagerFirebase'
@@ -17,32 +17,30 @@ const ReservationDetails=({navigation, route})=>{
         const [count, setCount] = useState(0);
         const [currentDate, setCurrentDate] = useState('');
         const [selectedCategoryIndex, setselectedCategoryIndex] = useState(0);
-        const [udata, setudata] = useState()
+        const [userData, setUserData] = useState({});
         //const auth = getAuth();
         //const user = auth.currentUser;
         useEffect(() => {
-          var date = new Date().getDate(); //Current Date
-          var month = new Date().getMonth() + 1; //Current Month
-          var year = new Date().getFullYear(); //Current Year
-          var hours = new Date().getHours(); //Current Hours
-          var min = new Date().getMinutes(); //Current Minutes
-          var sec = new Date().getSeconds(); //Current Seconds
-         // db 
-         // .collection('UserData').doc(user.email).get().then(DocumentSnapshot => {
-         // if (DocumentSnapshot.exists){
-         // const udata = DocumentSnapshot.data()
-         // return setudata(udata)
-         // }
-    
-          //})
-          setCurrentDate(
-            date + '/' + month + '/' + year 
-            + ' ' + hours + ':' + min + ':' + sec
-          );
-        }, []);
+          setCurrentDate(new Date().toLocaleString());
+  
+          const user = auth.currentUser;
+          if (user) {
+              fetchUserData(user.email);
+          }
+      }, []);
         
         //    {Counter function}
-
+        const fetchUserData = async (email) => {
+          try {
+              const userRef = db.collection('UserData').doc(email);
+              const doc = await userRef.get();
+              if (doc.exists) {
+                  setUserData(doc.data());
+              }
+          } catch (error) {
+              console.error("Error fetching user data: ", error);
+          }
+      };
           function Counter(){
             
             
@@ -73,7 +71,7 @@ const ReservationDetails=({navigation, route})=>{
               );
             };
             
-          const handlebook =() =>{
+          //const handlebook =() =>{
             
           //  db
           //  .collection('Reservation')
@@ -103,8 +101,28 @@ const ReservationDetails=({navigation, route})=>{
             //  }
             //)
   
-            navigation.navigate('OrderSubmit', Table)
-          }
+            //navigation.navigate('OrderSubmit', Table)
+          //}
+
+
+          const handlebook = async () => {
+            try {
+                const reservationData = {
+                    Name: `${userData.firstName} ${userData.lastName}`,
+                    Date: currentDate,
+                    Table_Type: item.name,
+                    Number_of_People: count
+                };
+        
+                await db.collection('Reservation').add(reservationData);
+                console.log('Reservation added successfully');
+                navigation.navigate('Confirm_res', Table)
+                // Optionally, navigate the user to a different screen or show a success message.
+            } catch (error) {
+                console.error("Error adding reservation: ", error);
+                alert(`Failed to add reservation: ${error.message}`);
+            }
+        }
         
         const ListCategories =()=>{
           

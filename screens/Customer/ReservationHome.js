@@ -2,8 +2,8 @@ import { Text, View, SafeAreaView, StyleSheet,Dimensions,Image,FlatList,Touchabl
 import React, {useState, useEffect} from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import Table from '../Menu/Table';
-//import {db} from '../../database/firebase'
-//import { getAuth } from "firebase/auth";
+import {db,auth} from '../../database/firebase'
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const {width} = Dimensions.get('screen');
 const cardWidth = width - 20;
@@ -29,6 +29,38 @@ function ReservationHome({navigation}) {
   //    }
   //  })
   //},[])
+
+  useEffect(() => {
+    
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (user) {
+        // User is signed in
+        db.collection('UserData').doc(user.email).get()
+          .then(DocumentSnapshot => {
+            if (DocumentSnapshot.exists) {
+              const udata = DocumentSnapshot.data();
+              setFirstname(udata.firstName);
+              setImgUrl(udata.imageUrl);
+            }
+          })
+          .catch(error => {
+            console.error("Error fetching user data:", error);
+          });
+      } else {
+        // User is signed out
+        setFirstname('');
+        setImgUrl(undefined);
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // ... rest of your component
+
     const Card = ({Table}) => {
         return(
           <TouchableHighlight 

@@ -3,7 +3,7 @@ import {View, SafeAreaView, StyleSheet, Image, Text, Alert, TouchableOpacity} fr
 //import {db} from '../../database/firebase'
 import { TextInput, Button} from 'react-native-paper'
 import * as ImagePicker from 'expo-image-picker';
-//import { getAuth } from "firebase/auth";
+import {auth} from '../../database/firebase'
 
 export default function Profile({navigation}){
     //const auth = getAuth();
@@ -148,6 +148,14 @@ export default function Profile({navigation}){
                 onPress={handleSave}>
                 Save Changes
             </Button>
+            <Button 
+              style={{width:'30%', alignSelf:'center', marginTop:20}} 
+              mode="contained"
+              color="red" 
+              onPress={() => auth.signOut().then(() => navigation.navigate('Signin'))}>
+              Logout
+            </Button>
+
       </SafeAreaView>
     );
 }
