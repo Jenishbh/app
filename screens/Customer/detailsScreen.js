@@ -1,10 +1,11 @@
-import { Text, View, SafeAreaView, StyleSheet,  Image, ScrollView,Alert } from 'react-native'
-import React, {useState} from 'react'
+import { Text, View, SafeAreaView, StyleSheet,  Image, ScrollView,Alert , Animated} from 'react-native'
+import React, {useState,useEffect} from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import {SecondButton} from '../../components/Button'
 //import {db} from '../../database/firebase'
 //import { getAuth } from "firebase/auth";
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -13,8 +14,46 @@ const DetailsScreen = ({navigation, route})=>{
     const item = route.params;
     //const auth = getAuth();
     //const user = auth.currentUser;
+
     
-    const handlebook = () => {
+    
+    const addToCart = async (itemToAdd) => {
+        try {
+            const storedCart = await AsyncStorage.getItem('@cartItems');
+            let cartItems = [];
+    
+            if (storedCart !== null) {
+                cartItems = JSON.parse(storedCart);
+            }
+    
+            // Check if the item already exists in the cart
+            const existingIndex = cartItems.findIndex(item => item.id === itemToAdd.id);
+    
+            if (existingIndex > -1) {
+                // Update the quantity of the existing item
+                cartItems[existingIndex].qty += 1;
+            } else {
+                // Add the new item to the cart
+                const newItem = {
+                    id: itemToAdd.id,
+                    name: itemToAdd.name,
+                    qty: 1,
+                    salePrice: itemToAdd.price,
+                    image: itemToAdd.image,
+                    checked: 1
+                };
+                cartItems.push(newItem);
+            }
+    
+            // Store the updated cart back to AsyncStorage
+            await AsyncStorage.setItem('@cartItems', JSON.stringify(cartItems));
+    
+        } catch (error) {
+            console.error("Error adding item to cart", error);
+        }
+    };
+    
+    const handlebook = async () => {
 
        // const dataref = db.collection('Reservation').doc(user.email);
         
@@ -39,7 +78,7 @@ const DetailsScreen = ({navigation, route})=>{
         //        })
         //    }
         //})
-
+        await addToCart(item);
         navigation.navigate('Home');
 
     }

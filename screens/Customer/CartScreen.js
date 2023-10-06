@@ -1,9 +1,12 @@
-import React,{useState} from 'react';
+import React,{useEffect} from 'react';
 import { StyleSheet, Button, Text, View, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl,TextInput, Alert, SafeAreaView } from 'react-native';
 import { MaterialIcons, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 //import {db} from '../../database/firebase'
 //import { getAuth } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 
@@ -22,12 +25,67 @@ export default class CartScreen extends React.Component {
 	
 		}
 	}
+
+	
+	componentDidMount() {
+        this.loadCartItems();
+    }
+
+    loadCartItems = async () => {
+        try {
+            const cartItemsString = await AsyncStorage.getItem('@cartItems');
+            if (cartItemsString !== null) {
+                const cartItems = JSON.parse(cartItemsString);
+                this.setState({ cartItems });
+            }
+        } catch (e) {
+            console.error("Error fetching cart items:", e);
+        }
+    };
+
+    storeCartItems = async (cartItems) => {
+        try {
+            const cartItemsString = JSON.stringify(cartItems);
+            await AsyncStorage.setItem('@cartItems', cartItemsString);
+        } catch (e) {
+            console.error("Error storing cart items:", e);
+        }
+    };
+
+	addCartItem = async (item) => {
+		const { cartItems } = this.state;
+		const newItems = [...cartItems, item];
+		this.setState({ cartItems: newItems });
+		await this.storeCartItems(newItems);
+	};
+	
+	updateCartItem = async (index, updatedItem) => {
+		const { cartItems } = this.state;
+		const newItems = [...cartItems];
+		newItems[index] = updatedItem;
+		this.setState({ cartItems: newItems });
+		await this.storeCartItems(newItems);
+	};
+	
+	removeCartItem = async (index) => {
+		const { cartItems } = this.state;
+		const newItems = [...cartItems];
+		newItems.splice(index, 1);
+		this.setState({ cartItems: newItems });
+		await this.storeCartItems(newItems);
+	};
+	
+	clearCart = async () => {
+		await AsyncStorage.removeItem('@cartItems');
+		this.setState({ cartItems: [] });
+	};
 	
 
 	render() {
 		const styles = StyleSheet.create({
 			centerElement: {justifyContent: 'center', alignItems: 'center'},
 		});
+
 		//const auth = getAuth();
     	//const user = auth.currentUser;
 		//const dataref = db.collection('Reservation').doc(user.email);
@@ -100,15 +158,16 @@ export default class CartScreen extends React.Component {
 
 			const deleteHandler = (index) => {
 				const newItems = [...this.state.cartItems];
+				newItems.splice(index, 1);
+    			this.setState({ cartItems: newItems });
+    			this.storeCartItems(newItems); 
 				Alert.alert(
 					'Are you sure you want to delete this item from your cart?',
 					'',
 					[
 						{text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-						{text: 'Delete', onPress: () => {
-							let updatedCart = this.state.cartItems; /* Clone it first */
-							updatedCart.splice(index, 1); /* Remove item from the cloned cart state */
-							this.setState(updatedCart); /* Update the state */
+						{text: 'Delete', onPress: () => this.removeCartItem(index)
+							 /* Update the state */
 							//dataref.collection('Food').get().then(DocumentSnapshot => {
 					
 								//DocumentSnapshot.forEach(doc =>{
@@ -117,7 +176,7 @@ export default class CartScreen extends React.Component {
 										
 								//	}
 								//})})
-						}},
+						},
 					],
 					{ cancelable: false }
 				);
@@ -128,7 +187,8 @@ export default class CartScreen extends React.Component {
 
 
 			const quantityHandler = (action, index) => {
-				const newItems = [...this.state.cartItems]; // clone the array 
+				const { cartItems } = this.state;
+				const newItems = [...cartItems];// clone the array 
 				
 				let currentQty = newItems[index]['qty'];
 				if(action == 'more'){
@@ -154,6 +214,7 @@ export default class CartScreen extends React.Component {
 								
 							//}
 					//	})})
+					this.updateCartItem(index, newItems[index]);
 				}
 				
 				this.setState({ cartItems: newItems }); // set new state
@@ -263,6 +324,9 @@ export default class CartScreen extends React.Component {
 							</View>
 						</View>
 						<View style={{flexDirection: 'row', justifyContent: 'flex-end', height: 32, paddingRight: 20, alignItems: 'center'}}>
+						<TouchableOpacity style={[styles.centerElement, { backgroundColor: '#ff0000', width: 100, height: 33, borderRadius: 5, marginRight: 10 }]} onPress={this.clearCart}>
+        					<Text style={{ color: '#ffffff' }}>Clear Cart</Text>
+    					</TouchableOpacity>
 							<TouchableOpacity style={[styles.centerElement, {backgroundColor: '#0faf9a', width: 100, height: 33, borderRadius: 5}]} onPress={()=>this.props.navigation.navigate('ReservationHome')}>
 								<Text style={{color: '#ffffff'}}>Checkout</Text>
 							</TouchableOpacity>
