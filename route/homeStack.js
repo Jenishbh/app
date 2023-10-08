@@ -12,6 +12,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Con from 'react-native-vector-icons/Octicons';
 import Menucard from '../screens/Customer/Menucard';
+import Error from '../screens/Customer/Error';
 //import Reservation from '../screens/Customer/Reservation'
 //import Manager_home from '../screens/Manager/Manager_home';
 //
@@ -70,7 +71,7 @@ const BottomNavigator = ({navigation}) => {
         }}
       />
       <Tab.Screen
-        name="ReservationHome"
+        name="Reservation"
         component={ReservationHome}
         options={{
           tabBarIcon: (color) => (
@@ -118,7 +119,7 @@ const BottomNavigator = ({navigation}) => {
       />
       <Tab.Screen
         name="About"
-        component={Login}
+        component={Error}
         options={{
           tabBarIcon: (color) => (
             <Con name="question"
@@ -135,6 +136,7 @@ const AuthNavigator = ()=>(
     
     <Stack.Navigator>
 
+            
          <Stack.Screen name='Signin' component={Login} options={{headerShown: false}} />
          <Stack.Screen name='Signup' component={Registration} options={{headerShown: false}} />
          <Stack.Screen name='Forgot_pass' component={Forget_pass} options={{headerShown: false}} />
@@ -147,6 +149,8 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}} />
          <Stack.Screen name='CartScreen' component={CartScreen} options={{headerShown: false}} />
          <Stack.Screen name='Confirm_res' component={Confirm_res} options={{headerShown: false}} />
+         <Stack.Screen name='Error' component={Error} options={{headerShown: false}} /> 
+         
          
         
         

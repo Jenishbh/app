@@ -1,7 +1,7 @@
 import React from "react";
 import { NavigationContainer} from "@react-navigation/native";
 import AuthNavigator from './route/homeStack';
-
+import ErrorBoundary from "./ErrorBoundary";
 //function App() {
   //return< Login />
   //return "Hello"
@@ -16,9 +16,11 @@ import AuthNavigator from './route/homeStack';
 export default function App() 
 {
   return(
+    <ErrorBoundary>
     <NavigationContainer>
     <AuthNavigator />
     </NavigationContainer>
+    </ErrorBoundary>
  )
  
 };
