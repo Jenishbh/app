@@ -1,49 +1,34 @@
-import React,{useEffect} from 'react';
-import { StyleSheet, Button, Text, View, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl,TextInput, Alert, SafeAreaView } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, Button, Text, View, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl, TextInput, Alert, SafeAreaView } from 'react-native';
 import { MaterialIcons, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-
-//import {db} from '../../database/firebase'
-//import { getAuth } from "firebase/auth";
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export default function CartScreen(props) {
+    const [selectAll, setSelectAll] = useState(false);
+    const [cartItemsIsLoading, setCartItemsIsLoading] = useState(false);
+    const [cartItems, setCartItems] = useState([]);
 
+    useFocusEffect(
+        useCallback(() => {
+            loadCartItems();
+            return () => {}; // Cleanup if necessary
+        }, [])
+    );
 
-
-
-export default class CartScreen extends React.Component {
-  
-	constructor(props){
-		super(props)
-
-    const {navigation}= this.props
-
-		this.state = {
-      
-			selectAll: false,
-			cartItemsIsLoading: false,
-			cartItems: []
-	
-		}
-	}
-
-	
-	componentDidMount() {
-        this.loadCartItems();
-    }
-
-    loadCartItems = async () => {
+    const loadCartItems = async () => {
         try {
             const cartItemsString = await AsyncStorage.getItem('@cartItems');
             if (cartItemsString !== null) {
                 const cartItems = JSON.parse(cartItemsString);
-                this.setState({ cartItems });
+                setCartItems(cartItems);
             }
         } catch (e) {
             console.error("Error fetching cart items:", e);
         }
     };
 
-    storeCartItems = async (cartItems) => {
+    const storeCartItems = async (cartItems) => {
         try {
             const cartItemsString = JSON.stringify(cartItems);
             await AsyncStorage.setItem('@cartItems', cartItemsString);
@@ -52,36 +37,33 @@ export default class CartScreen extends React.Component {
         }
     };
 
-	addCartItem = async (item) => {
-		const { cartItems } = this.state;
-		const newItems = [...cartItems, item];
-		this.setState({ cartItems: newItems });
-		await this.storeCartItems(newItems);
-	};
-	
-	updateCartItem = async (index, updatedItem) => {
-		const { cartItems } = this.state;
-		const newItems = [...cartItems];
-		newItems[index] = updatedItem;
-		this.setState({ cartItems: newItems });
-		await this.storeCartItems(newItems);
-	};
-	
-	removeCartItem = async (index) => {
-		const { cartItems } = this.state;
-		const newItems = [...cartItems];
-		newItems.splice(index, 1);
-		this.setState({ cartItems: newItems });
-		await this.storeCartItems(newItems);
-	};
-	
-	clearCart = async () => {
-		await AsyncStorage.removeItem('@cartItems');
-		this.setState({ cartItems: [] });
-	};
+    const addCartItem = async (item) => {
+        const newItems = [...cartItems, item];
+        setCartItems(newItems);
+        await storeCartItems(newItems);
+    };
+
+    const updateCartItem = async (index, updatedItem) => {
+        const newItems = [...cartItems];
+        newItems[index] = updatedItem;
+        setCartItems(newItems);
+        await storeCartItems(newItems);
+    };
+
+    const removeCartItem = async (index) => {
+        const newItems = [...cartItems];
+        newItems.splice(index, 1);
+        setCartItems(newItems);
+        await storeCartItems(newItems);
+    };
+
+    const clearCart = async () => {
+        await AsyncStorage.removeItem('@cartItems');
+        setCartItems([]);
+    };
 	
 
-	render() {
+	
 		const styles = StyleSheet.create({
 			centerElement: {justifyContent: 'center', alignItems: 'center'},
 		});
@@ -89,7 +71,7 @@ export default class CartScreen extends React.Component {
 		//const auth = getAuth();
     	//const user = auth.currentUser;
 		//const dataref = db.collection('Reservation').doc(user.email);
-		const { cartItems, cartItemsIsLoading, selectAll } = this.state;
+		
 
 		// Fetch DEtails from firebase
 
@@ -120,9 +102,9 @@ export default class CartScreen extends React.Component {
 
 		  //Check mark handler
 			let selectHandler = (index, value) => {
-				const newItems = [...this.state.cartItems]; // clone the array 
+				const newItems = [...cartItems]; // clone the array 
 				newItems[index]['checked'] = value == 1 ? 0 : 1; // set the new value 
-				this.setState({ cartItems: newItems }); // set new state
+				setCartItems(newItems ); // set new state
 				//dataref.collection('Food').get().then(DocumentSnapshot => {
 					
 				//	DocumentSnapshot.forEach(doc =>{
@@ -137,11 +119,12 @@ export default class CartScreen extends React.Component {
 
 
 			let selectHandlerAll = (value) => {
-				const newItems = [...this.state.cartItems]; // clone the array 
+				const newItems = [...cartItems]; // clone the array 
 				newItems.map((item, index) => {
 					newItems[index]['checked'] = value == true ? 0 : 1; // set the new value 
 				});
-				this.setState({ cartItems: newItems, selectAll: (value == true ? false : true) }); // set new state
+				setCartItems( newItems )
+				setSelectAll(value == true ? false : true); // set new state
 				//dataref.collection('Food').get().then(DocumentSnapshot => {
 					
 					//DocumentSnapshot.forEach(doc =>{
@@ -157,37 +140,36 @@ export default class CartScreen extends React.Component {
 
 
 			const deleteHandler = (index) => {
-				const newItems = [...this.state.cartItems];
-				newItems.splice(index, 1);
-    			this.setState({ cartItems: newItems });
-    			this.storeCartItems(newItems); 
 				Alert.alert(
+					'Delete Item',
 					'Are you sure you want to delete this item from your cart?',
-					'',
 					[
-						{text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-						{text: 'Delete', onPress: () => this.removeCartItem(index)
-							 /* Update the state */
-							//dataref.collection('Food').get().then(DocumentSnapshot => {
-					
-								//DocumentSnapshot.forEach(doc =>{
-								//	if (newItems[index]['id'] == doc.data().id) {
-								//		doc.ref.delete();
-										
-								//	}
-								//})})
+						{
+							text: 'Cancel',
+							onPress: () => console.log('Cancel Pressed'),
+							style: 'cancel'
 						},
+						{
+							text: 'Delete',
+							onPress: () => {
+								const newItems = [...cartItems];
+								newItems.splice(index, 1);
+								setCartItems(newItems );
+								storeCartItems(newItems); 
+								// If you're using Firebase or any other backend, you can also add the code to remove the item from the database here.
+							}
+						}
 					],
 					{ cancelable: false }
 				);
-				
 			}
+			
 			
 
 
 
 			const quantityHandler = (action, index) => {
-				const { cartItems } = this.state;
+				
 				const newItems = [...cartItems];// clone the array 
 				
 				let currentQty = newItems[index]['qty'];
@@ -214,16 +196,16 @@ export default class CartScreen extends React.Component {
 								
 							//}
 					//	})})
-					this.updateCartItem(index, newItems[index]);
+					updateCartItem(index, newItems[index]);
 				}
 				
-				this.setState({ cartItems: newItems }); // set new state
+				setCartItems(newItems); // set new state
 			}
 
 
 			
 			const subtotalPrice = () => {
-				const { cartItems } = this.state;
+				
 				if(cartItems){
 					return cartItems.reduce((sum, item) => sum + (item.checked == 1 ? item.qty * item.salePrice : 0), 0 );
 				}
@@ -234,7 +216,7 @@ export default class CartScreen extends React.Component {
 			<View style={{flex: 1, backgroundColor: '#f6f6f6',marginTop:40}}>
 				<View style={{flexDirection: 'row', backgroundColor: '#fff', marginBottom: 10}}>
 					<View style={[styles.centerElement, {width: 50, height: 50}]}>
-						<Ionicons name="ios-cart" size={25} color="#000" onPress={()=>this.props.navigation.navigate('Customer_main')}/>
+						<Ionicons name="ios-cart" size={25} color="#000" onPress={()=>props.navigation.navigate('Home')}/>
 					</View>
 					<View style={[styles.centerElement, {height: 50}]}>
 						<Text style={{fontSize: 18, color: '#000'}}>Shopping Cart</Text>
@@ -324,10 +306,10 @@ export default class CartScreen extends React.Component {
 							</View>
 						</View>
 						<View style={{flexDirection: 'row', justifyContent: 'flex-end', height: 32, paddingRight: 20, alignItems: 'center'}}>
-						<TouchableOpacity style={[styles.centerElement, { backgroundColor: '#ff0000', width: 100, height: 33, borderRadius: 5, marginRight: 10 }]} onPress={this.clearCart}>
+						<TouchableOpacity style={[styles.centerElement, { backgroundColor: '#ff0000', width: 100, height: 33, borderRadius: 5, marginRight: 10 }]} onPress={clearCart}>
         					<Text style={{ color: '#ffffff' }}>Clear Cart</Text>
     					</TouchableOpacity>
-							<TouchableOpacity style={[styles.centerElement, {backgroundColor: '#0faf9a', width: 100, height: 33, borderRadius: 5}]} onPress={()=>this.props.navigation.navigate('ReservationHome')}>
+							<TouchableOpacity style={[styles.centerElement, {backgroundColor: '#0faf9a', width: 100, height: 33, borderRadius: 5}]} onPress={()=>props.navigation.navigate('ReservationHome')}>
 								<Text style={{color: '#ffffff'}}>Checkout</Text>
 							</TouchableOpacity>
 							
@@ -337,5 +319,5 @@ export default class CartScreen extends React.Component {
 			</View>
       
 		);
-	}
+	
 }
