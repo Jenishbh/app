@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {View, SafeAreaView, StyleSheet,Button, Image, ImageBackground,Text, TextInput,TouchableOpacity} from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
-//import {getAuth,   sendPasswordResetEmail,} from 'firebase/auth'
+import {getAuth,   sendPasswordResetEmail,} from 'firebase/auth'
 
 
 
@@ -10,15 +10,27 @@ function Forget_pass() {
   const navigation = useNavigation()
   const[email, setEmail]= useState('')
 
+  const [feedback, setFeedback] = useState('');
+
+  const isValidEmail = (email) => {
+    const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return re.test(email);
+  };
+
+
   const forgot_pass_handle = ()=> {    //handle Forget Pass by Firebase
 
-    //const auth = getAuth();
-    //sendPasswordResetEmail(auth, email)
-    //.then( ()=> {
-    //  alert('Please check your email...')
-    //})
-    //.catch((error) => alert(error.message));
-    alert('Your pass is: 123456')
+    const auth = getAuth();
+    sendPasswordResetEmail(auth, email)
+    .then( ()=> {
+      alert('Please check your email...')
+    })
+    .catch((error) => alert(error.message));
+    if (!isValidEmail(email)) {
+      setFeedback('Please enter a valid email address.');
+      return;
+    }
+    setFeedback('Please check your email...');
 
   }
 

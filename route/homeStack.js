@@ -26,7 +26,7 @@ import Profile from '../screens/Customer/Profile'
 //import Menu_edit from '../screens/Manager/Menu_edit';
 //import Menu_input from '../screens/Manager/Menu_input';
 //import Signup from '../screens/Welcome/Signup';
-//import Otp from '../screens/Welcome/Otp';
+import Otp from '../screens/Welcome/Otp';
 //import Tabnavigator from '../screens/Manager/Tabnavigator';
 import ReservationHome from '../screens/Customer/ReservationHome';
 import ReservationDetails from '../screens/Customer/ReservationDetails';
@@ -119,7 +119,7 @@ const BottomNavigator = ({navigation}) => {
       />
       <Tab.Screen
         name="About"
-        component={Error}
+        component={Otp}
         options={{
           tabBarIcon: (color) => (
             <Con name="question"
@@ -136,7 +136,7 @@ const AuthNavigator = ()=>(
     
     <Stack.Navigator>
 
-            
+        <Stack.Screen name='Otp' component={Otp} options={{headerShown: false}} /> 
          <Stack.Screen name='Signin' component={Login} options={{headerShown: false}} />
          <Stack.Screen name='Signup' component={Registration} options={{headerShown: false}} />
          <Stack.Screen name='Forgot_pass' component={Forget_pass} options={{headerShown: false}} />
@@ -150,6 +150,8 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='CartScreen' component={CartScreen} options={{headerShown: false}} />
          <Stack.Screen name='Confirm_res' component={Confirm_res} options={{headerShown: false}} />
          <Stack.Screen name='Error' component={Error} options={{headerShown: false}} /> 
+         
+         
          
          
         
