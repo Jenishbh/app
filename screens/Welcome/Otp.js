@@ -8,17 +8,47 @@ import firebase from 'firebase/compat/app';
 
 const Otp = ({ navigation }) => {
     const [isVerified, setIsVerified] = useState(false);
+    const [checkInterval, setCheckInterval] = useState(null);
+    const [shouldCheck, setShouldCheck] = useState(true); 
+
+    const checkVerification = () => {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            // Force reload the user data from Firebase
+            user.reload().then(() => {
+                console.log("User email verified status:", user.emailVerified);
+                if (user.emailVerified) {
+                    setIsVerified(true);
+                    if (checkInterval) {
+                        clearInterval(checkInterval);
+                        setShouldCheck(false); // This will stop further checks
+                    }
+                }
+            }).catch(error => {
+                console.error("Error reloading user data:", error);
+            });
+        } else {
+            console.log("No user currently authenticated.");
+        }
+    };
 
     useEffect(() => {
-        const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-            if (user && user.emailVerified) {
-                setIsVerified(true);
+        // Set up periodic checks every 10 seconds 
+        if (shouldCheck) { 
+            const interval = setInterval(checkVerification, 10000);
+            setCheckInterval(interval);
+        }
+
+        // Cleanup on unmount or if shouldCheck changes
+        return () => {
+            if (checkInterval) {
+                clearInterval(checkInterval);
             }
-        });
-    
-        // Clean up the listener when the component is unmounted
-        return () => unsubscribe();
-    }, []);
+        };
+    }, [shouldCheck]); // We've added shouldCheck to the dependency array
+
+   
+
 
     const resendVerificationEmail = () => {
         const user = firebase.auth().currentUser;
@@ -34,9 +64,9 @@ const Otp = ({ navigation }) => {
             <KeyboardAwareScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={require('../../assets/third.jpg')} style={styles.logo} />
                 <Text style={styles.title}>Authentication</Text>
-                
+                <Text>Last Checked: {new Date(timestamp).toLocaleTimeString()}</Text>
 
-                {isVerified ? (
+                {isVerified == true ? (
                     <>
                        <Text style={styles.subtitle}>Welcome! Your email has been verified.</Text>
                         <Image
