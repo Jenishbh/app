@@ -5,9 +5,7 @@ import OTPInputView from '@twotalltotems/react-native-otp-input';
 import { PrimaryButton, SecondButton } from '../../components/Button';
 import { auth } from '../../database/firebase';
 import RNPickerSelect from 'react-native-picker-select';
-import ReCaptcha from 'react-native-recaptcha-that-works';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import PhoneInput from "react-native-phone-number-input";
+import firebase from 'firebase/compat';
 
 
 const Otp = ({ navigation }) => {
@@ -21,7 +19,7 @@ const Otp = ({ navigation }) => {
 
     const sendVerificationCode = async () => {
         try {
-            const phoneProvider = new auth.PhoneAuthProvider();
+            const phoneProvider = new firebase.auth.PhoneAuthProvider();
             const verificationId = await phoneProvider.verifyPhoneNumber(
                 phoneNumber,
                 recaptchaVerifier.current
