@@ -15,6 +15,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 
 
+
 const Signup = ({navigation}) =>{
     const [email, setEmail]= React.useState('')
     const [password, setPassword]= React.useState('')  
@@ -48,8 +49,20 @@ const Signup = ({navigation}) =>{
           return;
         } 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-          //signInWithPhoneNumber;
-          console.log('Signup successfully with: ',userCredential.user.email) ;
+        if (userCredential && userCredential.user) {
+            try {
+                await auth.currentUser.sendEmailVerification({
+                    handleCodeInApp: true,
+                    url: 'https://customerapp-18dc5.firebaseapp.com' // Corrected 'htpps' typo
+                });
+                alert('Verification email has been sent!');
+            } catch (emailError) {
+                alert('Error sending verification email: ' + emailError.message);
+                // Optionally: throw emailError; if you want to halt the function here
+            }
+        } else {
+            console.log('User creation might not have been successful.');
+        }
             
           
   
@@ -63,9 +76,9 @@ const Signup = ({navigation}) =>{
           })
         
           console.log('User added!')
-          navigation.navigate('Signin')
+          navigation.navigate('Otp')
         }
-            catch(error) {alert('Error adding user data: ',error.message)
+        catch(error) {alert('Error adding user data: ',error.message)
   
           
         }

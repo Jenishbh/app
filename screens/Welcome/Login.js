@@ -31,30 +31,13 @@ const Signin = ({ navigation }) => {
     const userCredentials = await signInWithEmailAndPassword(auth, email, password)
         const user = userCredentials.user;
         console.log('Log in with: ', user.email);
-        const encodedEmail = user.email.replace('@', '_at_').replace(/\./g, '_dot_');
-        const userRef = firebase.database().ref('users/' + encodedEmail);
-        const snapshot = await userRef.once('value');
-        const userData = snapshot.val();
-        if (userData) {
-          // User path exists in the database
-          if (userData.hasCompletedOnboarding) {
-            // If the user has completed onboarding, navigate to the main card page
+        
             navigation.navigate('Home');
-          } else {
-            // If the user hasn't completed onboarding, navigate to the onboarding page
-            navigation.navigate('OnBording');
-          }
-        } else {
-          // User path does not exist in the database, create it
-          await userRef.set({
-            hasCompletedOnboarding: false,
-            // ... any other user data you want to store
-          });
-          // Navigate to the onboarding page as the user is logging in for the first time
-          navigation.navigate('OnBording');
+          
         }
-      }catch(error){ alert(error.message)}
-}
+    catch(error){ alert(error.message)}
+      }
+
   
   const handleEmployeeLogin = () => {
     //Handel Login by firebase

@@ -136,10 +136,11 @@ const AuthNavigator = ()=>(
     
     <Stack.Navigator>
 
-        <Stack.Screen name='Otp' component={Otp} options={{headerShown: false}} /> 
+        
          <Stack.Screen name='Signin' component={Login} options={{headerShown: false}} />
          <Stack.Screen name='Signup' component={Registration} options={{headerShown: false}} />
          <Stack.Screen name='Forgot_pass' component={Forget_pass} options={{headerShown: false}} />
+         <Stack.Screen name='Otp' component={Otp} options={{headerShown: false}} /> 
          <Stack.Screen name='OnBording' component={OnBording} options={{headerShown: false}} />
          <Stack.Screen name='Menucard' component={Menucard} options={{headerShown: false}} />
          <Stack.Screen name='DetailsScreen' component={DetailsScreen} options={{headerShown: false}} />

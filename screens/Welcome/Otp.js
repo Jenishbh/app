@@ -1,118 +1,66 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, View, SafeAreaView, Image, StyleSheet, TextInput, Alert} from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import OTPInputView from '@twotalltotems/react-native-otp-input';
 import { PrimaryButton, SecondButton } from '../../components/Button';
-import { auth } from '../../database/firebase';
-import RNPickerSelect from 'react-native-picker-select';
-import firebase from 'firebase/compat';
+import firebase from 'firebase/compat/app';
+
 
 
 const Otp = ({ navigation }) => {
-    const [timer, setTimer] = useState(60);
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [code, setCode] = useState('');
-    const [verificationId, setVerificationId] = useState(null);
-    const recaptchaVerifier = useRef(null);
-    const [countryCode, setCountryCode] = useState('+1'); // default to US
-    const [captchaVerified, setCaptchaVerified] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
 
-    const sendVerificationCode = async () => {
-        try {
-            const phoneProvider = new firebase.auth.PhoneAuthProvider();
-            const verificationId = await phoneProvider.verifyPhoneNumber(
-                phoneNumber,
-                recaptchaVerifier.current
-            );
-            setVerificationId(verificationId);
-            setTimer(60);
-        } catch (error) {
-            console.error('Phone number verification failed. Check your phone number.', error);
-        }
-    };
+    useEffect(() => {
+        const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+            if (user && user.emailVerified) {
+                setIsVerified(true);
+            }
+        });
+    
+        // Clean up the listener when the component is unmounted
+        return () => unsubscribe();
+    }, []);
 
-    const confirmCode = async () => {
-        try {
-            const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
-            await firebase.auth().signInWithCredential(credential);
-            navigation.replace('Onbording');
-        } catch (error) {
-            console.log('Invalid code.');
-        }
+    const resendVerificationEmail = () => {
+        const user = firebase.auth().currentUser;
+        user.sendEmailVerification().then(function() {
+            Alert.alert("Email Sent", "A verification email has been sent. Please check your inbox.");
+        }).catch(function(error) {
+            Alert.alert("Error", "An error occurred while sending the verification email.");
+        });
     };
-    const onCaptchaVerify = () => {
-        setCaptchaVerified(true);
-    };
-    // Timer logic
-    React.useEffect(() => {
-        let interval;
-        if (timer > 0) {
-            interval = setInterval(() => {
-                setTimer(prevTimer => prevTimer - 1);
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [timer]);
 
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAwareScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={require('../../assets/third.jpg')} style={styles.logo} />
-                <Text style={styles.title}>OTP Authentication</Text>
-                <Text style={styles.subtitle}>An authentication code had been sent to Registered email</Text>
+                <Text style={styles.title}>Authentication</Text>
+                
 
-                {!verificationId ? (
+                {isVerified ? (
                     <>
-                        <View style={styles.phoneContainer}>
-                        <RNPickerSelect
-                            onValueChange={(value) => setCountryCode(value)}
-                            items={[
-                                { label: 'US (+1)', value: '+1' },
-                                { label: 'UK (+44)', value: '+44' },
-                                // ... other countries
-                            ]}
-                            style={{...pickerSelectStyles, flex:1, maxWidth: '40%'}}
-                            value={countryCode}
-                            placeholder={{ label: "Select a country...", value: null }}
-                            useNativeAndroidPickerStyle={false}
+                       <Text style={styles.subtitle}>Welcome! Your email has been verified.</Text>
+                        <Image
+                        source={require('../../assets/animation_lnsac4fn_small.gif')}
+                            style={{ height: 180, width:150, marginTop:50 }}                        
+                        />
+                      <PrimaryButton title='Continue' onPress={ ()=>navigation.navigate('OnBording')} 
+                        btnContainer={{
 
-                        />
-                        <TextInput
-                            placeholder='Enter Phone Number without country code'
-                            value={phoneNumber}
-                            onChangeText={setPhoneNumber}
-                            keyboardType="phone-pad"
-                            style={{...styles.input, flex:1, maxWidth: '60%'}}
-                        />
-                        </View>
-                       
-                        
-                            <PrimaryButton title='Send OTP' onPress={sendVerificationCode}
-                                btnContainer={{
-                                    backgroundColor: 'orange',
-                                    height: 55, width: 200,
-                                    borderRadius: 24,
-                                    marginTop: 24
-                                }} />
+                        backgroundColor: 'orange',
+                        height: 55, width: 200,
+                        borderRadius: 24,
+                        marginTop: 24
+
+                        }}/>
                         
                     </>
                 ) : (
                     <>
-                        <OTPInputView
-                            pinCount={4}
-                            style={styles.otpInput}
-                            codeInputFieldStyle={styles.otpField}
-                            onCodeFilled={setCode}
-                        />
-                        <View style={styles.resendContainer}>
-                            <Text style={styles.resendText}>Didn't receive code?</Text>
-                            <SecondButton
-                                title={`Resend (${timer}s)`}
-                                disabled={timer !== 0}
-                                onPress={sendVerificationCode}
-                            />
-                        </View>
-                        <PrimaryButton title='Continue' onPress={confirmCode} 
+                        <Text style={styles.subtitle}>An authentication link has been sent to your registered email. Please click on the link to verify.</Text>
+                        
+                    
+                        
+                        <PrimaryButton title='Resend Link' onPress={resendVerificationEmail} 
                         btnContainer={{
 
                         backgroundColor: 'orange',
@@ -283,7 +231,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     footer: {
-        marginTop: 184,
+        marginTop: 100,
         alignItems: 'center',
     },
     footerText: {
