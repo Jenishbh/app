@@ -203,7 +203,7 @@ const AuthNavigator = () => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Manager_home"
+      name="Manager"
       component={Manager_home}
       options={{ headerShown: false }}
     />
