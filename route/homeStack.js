@@ -39,7 +39,7 @@ import Confirm_res from '../screens/Customer/Confirm_res';
 //import CheckOut from '../screens/Manager/CheckOutPage';
 //import Orderpage from '../screens/Manager/dash/Orderpage';
 //import Sales from '../screens/Manager/dash/sales';
-//import OrderSubmit from '../screens/Customer/OrderSubmit';
+import OrderSubmit from '../screens/Customer/OrderSubmit';
 //
 //
 const Stack= createStackNavigator();
@@ -151,6 +151,7 @@ const AuthNavigator = ()=>(
          <Stack.Screen name='CartScreen' component={CartScreen} options={{headerShown: false}} />
          <Stack.Screen name='Confirm_res' component={Confirm_res} options={{headerShown: false}} />
          <Stack.Screen name='Error' component={Error} options={{headerShown: false}} /> 
+         <Stack.Screen name='OrderSubmit' component={OrderSubmit} options={{headerShown: false}} /> 
          
          
          

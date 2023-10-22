@@ -3,11 +3,11 @@ import React from "react";
 import { Text, View, SafeAreaView, StyleSheet,  Image, ScrollView,Alert , Animated} from 'react-native'
 import {PrimaryButton} from '../../components/Button'
 
-
+import { useNavigation } from '@react-navigation/native';
 
 
 const Error = () =>{
-
+    
 return(
     <SafeAreaView     
     style={{
@@ -29,7 +29,9 @@ return(
                 marginTop: 24
 
             }}
+            //onPress={() => navigation.navigate('Login')}
             title='Login' />
+            
             </View>
         </View>
     </SafeAreaView>

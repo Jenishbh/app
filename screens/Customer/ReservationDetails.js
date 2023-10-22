@@ -4,7 +4,7 @@ import {PrimaryButton} from "../../components/Button";
 import Watch from '../Menu/Time';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {db,auth} from '../../database/firebase'
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Table from "../Menu/Table";
 //import firebase from "firebase/compat";
 //import { Manager_db } from '../../database/ManagerFirebase'
@@ -22,11 +22,11 @@ const ReservationDetails=({navigation, route})=>{
         //const user = auth.currentUser;
         useEffect(() => {
           setCurrentDate(new Date().toLocaleString());
-  
           const user = auth.currentUser;
           if (user) {
               fetchUserData(user.email);
           }
+  
       }, []);
         
         //    {Counter function}
@@ -104,19 +104,30 @@ const ReservationDetails=({navigation, route})=>{
             //navigation.navigate('OrderSubmit', Table)
           //}
 
-
-          const handlebook = async () => {
+          const storeReservationDetails = async (reservationData) => {
             try {
-                const reservationData = {
-                    Name: `${userData.firstName} ${userData.lastName}`,
-                    Date: currentDate,
-                    Table_Type: item.name,
-                    Number_of_People: count
-                };
-        
-                await db.collection('Reservation').add(reservationData);
-                console.log('Reservation added successfully');
-                navigation.navigate('Confirm_res', Table)
+              await AsyncStorage.setItem('@reservation', JSON.stringify(reservationData));
+            } catch (error) {
+              console.error("Error saving reservation data to AsyncStorage:", error);
+            }
+          };
+          const handlebook =  () => {
+            try {
+
+              const reservationData = {
+                Name: `${userData.firstName} ${userData.lastName}`,
+                Date: currentDate,
+                Table_Type: item.name,
+                Number_of_People: count
+            };
+              storeReservationDetails(reservationData);
+
+              // Navigate to the OrderSubmit screen or any other logic you have:
+              navigation.navigate('OrderSubmit');
+                //adding thease data not to firebase and fpusing them to order submit page 
+                //await db.collection('Reservation').add(reservationData);
+                //console.log('Reservation added successfully');
+               // navigation.navigate('Confirm_res', Table)
                 // Optionally, navigate the user to a different screen or show a success message.
             } catch (error) {
                 console.error("Error adding reservation: ", error);

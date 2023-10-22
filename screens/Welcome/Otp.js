@@ -10,19 +10,18 @@ const Otp = ({ navigation }) => {
     const [isVerified, setIsVerified] = useState(false);
     const [checkInterval, setCheckInterval] = useState(null);
     const [shouldCheck, setShouldCheck] = useState(true); 
+    const [lastChecked, setLastChecked] = useState(null);
 
     const checkVerification = () => {
         const user = firebase.auth().currentUser;
+        setLastChecked(new Date());
         if (user) {
             // Force reload the user data from Firebase
             user.reload().then(() => {
                 console.log("User email verified status:", user.emailVerified);
                 if (user.emailVerified) {
                     setIsVerified(true);
-                    if (checkInterval) {
-                        clearInterval(checkInterval);
-                        setShouldCheck(false); // This will stop further checks
-                    }
+                    clearInterval(checkInterval);
                 }
             }).catch(error => {
                 console.error("Error reloading user data:", error);
@@ -33,19 +32,18 @@ const Otp = ({ navigation }) => {
     };
 
     useEffect(() => {
-        // Set up periodic checks every 10 seconds 
-        if (shouldCheck) { 
-            const interval = setInterval(checkVerification, 10000);
-            setCheckInterval(interval);
-        }
-
-        // Cleanup on unmount or if shouldCheck changes
-        return () => {
-            if (checkInterval) {
-                clearInterval(checkInterval);
+        // Set up periodic checks every 10 seconds only if the email is not verified yet
+        const checkInterval = setInterval(() => {
+            if (!isVerified) { // <-- Only check for verification if not already verified
+                checkVerification();
             }
+        }, 10000);
+
+        // Cleanup on unmount
+        return () => {
+            clearInterval(checkInterval);
         };
-    }, [shouldCheck]); // We've added shouldCheck to the dependency array
+    }, [isVerified]); // We've added shouldCheck to the dependency array
 
    
 
@@ -64,7 +62,7 @@ const Otp = ({ navigation }) => {
             <KeyboardAwareScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={require('../../assets/third.jpg')} style={styles.logo} />
                 <Text style={styles.title}>Authentication</Text>
-                <Text>Last Checked: {new Date(timestamp).toLocaleTimeString()}</Text>
+                <Text>Last Checked: {lastChecked ? lastChecked.toLocaleTimeString() : "Not checked yet"}</Text>
 
                 {isVerified == true ? (
                     <>

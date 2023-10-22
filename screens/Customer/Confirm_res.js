@@ -144,19 +144,10 @@ console.log(food)
         </SafeAreaView>
       }
 
-      <View ref={viewRef}>
-        {Receipt}
-      </View>
+
 
 const saveScreenshot = async () => {
-  const viewRef = useRef(null);
-  const uri = await captureRef(viewRef, {
-    format: "png",
-    quality: 0.8,
-  })
-  
-     
-      console.log("Image saved to", uri);
+
       // Optionally save the image to the device's gallery
       
     
