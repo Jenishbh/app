@@ -115,7 +115,7 @@ const ReservationDetails=({navigation, route})=>{
             try {
 
               const reservationData = {
-                Name: `${userData.firstName} ${userData.lastName}`,
+                Name: `${userData.username}`,
                 Date: currentDate,
                 Table_Type: item.name,
                 Number_of_People: count
