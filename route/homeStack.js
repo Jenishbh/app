@@ -126,6 +126,8 @@ const BottomNavigator = ({ navigation }) => {
 
 const AuthNavigator = () => (
   <Stack.Navigator>
+
+    
     <Stack.Screen
       name="Signin"
       component={Login}

@@ -1,12 +1,13 @@
-import { Dimensions, SafeAreaView, Text, View } from 'react-native'
-import React, { useState,useEffect } from 'react'
+import { Dimensions, SafeAreaView, Text, View, } from 'react-native'
+import React, { useState,useEffect,useRef } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 //import ZigzagView from "react-native-zigzag-view"
 import QRCode from 'react-native-qrcode-svg';
 import { PrimaryButton } from '../../components/Button';
 import {db} from '../../database/firebase'
 import { getAuth } from "firebase/auth";
-import { captureRef } from "react-native-view-shot";
+import { captureRef   } from "react-native-view-shot";
+import * as MediaLibrary from 'expo-media-library';
  // if you want to save the image to the device's gallery
 
 
@@ -18,6 +19,7 @@ function Confirm_res ({navigation}){
   const [foodData, setFoodData] = useState([]);
   const auth = getAuth();
   const user = auth.currentUser;
+  const safeAreaViewRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,8 +151,27 @@ console.log(food)
 const saveScreenshot = async () => {
 
       // Optionally save the image to the device's gallery
-      
-    
+      try {
+        // Capture screenshot
+        const uri = await captureRef(safeAreaViewRef, {
+          format: 'png',
+          quality: 0.8,
+        });
+  
+        // Request permission to save to gallery
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === 'granted') {
+          // Save the captured image to gallery
+          await MediaLibrary.saveToLibraryAsync(uri);
+          alert('Saved to photos!');
+        } else {
+          alert('Permission not granted!');
+        }
+      } catch (error) {
+        console.error("Failed to save screenshot", error);
+        alert('An error occurred!');
+      }
+
     
   
   navigation.navigate('Home')
@@ -158,9 +179,12 @@ const saveScreenshot = async () => {
 
 
     return(
-
-        <SafeAreaView style={{backgroundColor:'white', flex:1}}>
+      
+        
+        <SafeAreaView ref={safeAreaViewRef} style={{backgroundColor:'white', flex:1}}>
+          
             {/* {Header} */}
+           
             <View style={{ 
                 paddingVertical:10,
                 marginHorizontal:20,
@@ -175,7 +199,7 @@ const saveScreenshot = async () => {
             </View>
             <Text style={{fontSize: 20,alignSelf:'center' }} onPress={navigation.goBack}>Receipt</Text>
             <Receipt />
-
+            
             <View style={{marginTop:20}}>
                 
                 <PrimaryButton
@@ -195,6 +219,7 @@ const saveScreenshot = async () => {
                 
             </View>
         </SafeAreaView>
+        
     )
 
 }
