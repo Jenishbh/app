@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import table_info from "./table_info.js";
+
 import { NavigationContainer } from "@react-navigation/native";
 
 const Table_view = ({ navigation }) => {
@@ -19,11 +19,11 @@ const Table_view = ({ navigation }) => {
         <TouchableOpacity
           style={styles.tables}
           onPress={() => {
-            navigation.navigate("table_info");
+           
           }}
         >
           <Image
-            source={require("../assets/tables/indoor_long.jpg")}
+            source={require("../../assets/table/indoor_long.jpg")}
             style={styles.table_image}
           />
           <View style={styles.info}>
@@ -34,11 +34,11 @@ const Table_view = ({ navigation }) => {
         <TouchableOpacity
           style={styles.tables}
           onPress={() => {
-            navigation.navigate("table_info");
+            
           }}
         >
           <Image
-            source={require("../assets/tables/outdoor_small.jpg")}
+            source={require("../../assets/table/outdoor_small.jpg")}
             style={styles.table_image}
           />
           <View style={styles.info}>
@@ -48,7 +48,7 @@ const Table_view = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.tables}>
           <Image
-            source={require("../assets/qr-code-scan-icon.png")}
+            source={require("../../assets/qr-code-scan-icon.png")}
             style={styles.table_image}
           />
           <View style={styles.info}>
@@ -56,89 +56,10 @@ const Table_view = ({ navigation }) => {
             <Text style={styles.table_occupy}> occupy by</Text>
           </View>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.tables}>
           <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
-            style={styles.table_image}
-          />
-          <View style={styles.info}>
-            <Text style={styles.table_type}> Table 1</Text>
-            <Text style={styles.table_occupy}> occupy by</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tables}>
-          <Image
-            source={require("../assets/qr-code-scan-icon.png")}
+            source={require("../../assets/qr-code-scan-icon.png")}
             style={styles.table_image}
           />
           <View style={styles.info}>

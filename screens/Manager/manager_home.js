@@ -42,7 +42,7 @@ export default function Manager_home({ navigation }) {
     <SafeAreaView style={styles.background}>
       <Image
         style={styles.logo}
-        source={require("../assets/table-management.png")}
+        source={require("../../assets/table-management.png")}
       />
       <Text style={styles.check_in}> Checked-In </Text>
       <TouchableOpacity
@@ -59,7 +59,7 @@ export default function Manager_home({ navigation }) {
         }}
       >
         <Image
-          source={require("../assets/qr-code-scan-icon.png")}
+          source={require("../../assets/qr-code-scan-icon.png")}
           style={styles.scanIcon}
         />
       </TouchableOpacity>

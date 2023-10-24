@@ -2,7 +2,8 @@ import React,{useState, useEffect}from "react";
 import { View,Image, Text, StyleSheet,  TextInput, ScrollView, TouchableOpacity,Dimensions } from "react-native";
 import {PrimaryButton} from "../../components/Button";
 import Watch from '../Menu/Time';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icona from 'react-native-vector-icons/FontAwesome5' 
+import Icon from 'react-native-vector-icons/Ionicons'
 import {db,auth} from '../../database/firebase'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Table from "../Menu/Table";
@@ -57,14 +58,14 @@ const ReservationDetails=({navigation, route})=>{
               };
             
               return (
-                <View style={{marginHorizontal: 10, marginVertical:20, paddingVertical: -20, flexDirection: 'row', justifyContent:'space-between'}}  >
+                <View style={{marginHorizontal: 20, marginVertical:20, flexDirection: 'row', justifyContent:'space-between'}}  >
                 <Text style={{fontWeight: 'bold'}} > Number Of Persons</Text>
                     <View style={{alignSelf:'baseline'}}>
-                    <Icon name='minus-circle-outline' size={18}  onPress={removeCountHandler}/>
+                    <Icona name='minus' size={18}  onPress={removeCountHandler}/>
                     </View>
                     <Text >{count}</Text>
                     <View > 
-                    <Icon name='plus-circle-outline' size={18}  onPress={addCountHandler}/>
+                    <Icona name='plus' size={18}  onPress={addCountHandler}/>
 
                     </View>
                     </View>
@@ -187,66 +188,54 @@ const ReservationDetails=({navigation, route})=>{
 
 
 
-    const List =()=>{
-                
-        return(
+// or whatever library you're using for icons
 
-                <View style={{flexDirection:'row',justifyContent:'center'}}>
-                    <View style={style.categorryBtnn}>
-  
-                    
-  
-                    <Text 
-                      style={{fontSize:15,
-                         fontWeight: 'bold',
-                          marginLeft:10,
-                           color:'white' 
-                            
-                             }}>
-                      {item.desO}
-                      
-                    </Text>
-                    </View>
-                    <View style={style.categorryBtnn}>
-  
-                    
-  
-                    <Text 
-                      style={{fontSize:15,
-                         fontWeight: 'bold',
-                          marginLeft: 8,
-                           color:'white' 
-                            
-                             }}>
-                      {item.desT}
-                      
-                    </Text>
-                    </View>
-                    <View style={style.categorryBtnn}>
-  
-                    
-  
-                    <Text 
-                      style={{fontSize:15,
-                         fontWeight: 'bold',
-                          marginLeft:20,
-                           color:'white' ,
-                           
-                            
-                             }}>
-                      {item.desS}
-                      
-                    </Text>
-                    </View>
-                  </View>
-                  
-  
-              
+const List = () => { // Don't forget to pass the 'item' prop to List when you use it
+    return (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal:10, flex:1 }}>
             
-  
-          
-        )
-      }
+            <View style={style.categorryBtnn}>
+                <Icona name="hashtag" size={20} color="grey" />
+                <Text 
+                    style={{
+                        fontSize: 15,
+                        fontWeight: 'bold',
+                        marginLeft: 5,
+                        color: 'lightblue'
+                    }}>
+                    {item.desO} 
+                </Text>
+            </View>
+
+            <View style={style.categorryBtnn}>
+                <Icona name="hashtag" size={20} color="grey" /> 
+                <Text 
+                    style={{
+                        fontSize: 15,
+                        fontWeight: 'bold',
+                        marginLeft: 5,
+                        color: 'lightblue'
+                    }}>
+                    {item.desT} 
+                </Text>
+            </View>
+
+            <View style={style.categorryBtnn}>
+                <Icon name="people" size={20} color="grey" />
+                <Text 
+                    style={{
+                        fontSize: 15,
+                        fontWeight: 'bold',
+                        marginLeft: 5,
+                        color: 'lightblue'
+                    }}>
+                    {item.desS} 
+                </Text>
+            </View>
+        </View>
+    )
+}
+
 
 
     return(
@@ -270,21 +259,13 @@ const ReservationDetails=({navigation, route})=>{
                 shadowOpacity: 0.2,
                 shadowRadius: 3,  
                 height: 100, width: 320, 
-                top : -20, backgroundColor: 'white', alignSelf:'center', }}> 
+                top : -20, backgroundColor: 'white', alignSelf:'center', padding:10}}> 
 
 
-                <View style={{flexDirection: 'row' , justifyContent: 'space-between'}}>
-
-                    <View style={{marginLeft:8,marginTop:8}} >
-
+                <View style={{flexDirection: 'row' , justifyContent: 'space-between', paddingHorizontal:5}}>
                         <Text style={{color: 'lightblue',fontSize:20,}}>{item.name}</Text>
-
-                    </View>
-
-
-                    <View style={{marginRight:5,marginTop:32}} >
-                        <Text style={{fontSize:18, color: 'orange'}}> Available</Text>
-                    </View>
+                        <Text style={{fontSize:17, color: 'orange', top:2}}> Available</Text>
+                    
                 </View>
 
                 <View style={{marginTop:5, alignSelf:'center', marginHorizontal: 10}}>
@@ -367,13 +348,13 @@ categorryBtn:{
    },
 categorryBtnn:{
     height: 33,
-    width: 80,
-    marginRight: 7,
+    
+    
     borderRadius: 30,
     alignItems: 'center',
-    paddingHorizontal: 5,
+    marginHorizontal: 20,
     flexDirection: 'row',
-    backgroundColor: 'lightblue'
+    
     
 
    },
