@@ -1,5 +1,5 @@
 import { Text, View, TouchableOpacity, Image, SafeAreaView, Alert } from 'react-native'
-import React from 'react'
+import React,{useState} from 'react'
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
 
@@ -8,10 +8,10 @@ import FormInput from '../../components/FormInput'
 import utils from '../../api/utils'
 import Switch from '../../components/Switch'
 import { PrimaryButton, SecondButton } from '../../components/Button'
-import { auth,database } from '../../database/firebase'
+import { auth,db } from '../../database/firebase'
 //import { Manager_auth } from '../../database/ManagerFirebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Signin = ({ navigation }) => {
@@ -22,20 +22,48 @@ const Signin = ({ navigation }) => {
   const [saveMe, setSaveMe] = React.useState(false)
   function isEnableSignIn() { return email != '' && password != '' && emailError == '' }
   const [showPass, setShowPass] = React.useState(false)
+  const [phone, setPhone] = useState('');
+  const [username, setUsername] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
 
 
   const handleLogin = async () => {
     //Handel Login by firebase
 
-    try{
-    const userCredentials = await signInWithEmailAndPassword(auth, email, password)
-        const user = userCredentials.user;
-        console.log('Log in with: ', user.email);
-        
-            navigation.navigate('Home');
-          
-        }
-    catch(error){ alert(error.message)}
+    try {
+      const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+      const authUser = userCredentials.user;
+  
+      console.log('Logged in with: ', authUser.email);
+  
+      // Fetching extended user details from Firestore
+      const doc = await db.collection('UserData').doc(authUser.email).get();
+  
+      if (doc.exists) {
+          const userData = doc.data();
+  
+          // Store the necessary details in AsyncStorage
+          await AsyncStorage.setItem('user_data', JSON.stringify({
+              email: userData.email,
+              username: userData.name,
+              phone: userData.phone,
+              imgUrl: userData.imageUrl
+          }));
+  
+          setUsername(userData.name);
+          setEmail(userData.email);
+          setPhone(userData.phone);
+          setImgUrl(userData.imageUrl);
+      } else {
+          console.error("No user details found in Firestore for:", authUser.email);
+          throw new Error("User details not found");
+      }
+  
+      navigation.navigate('Home');
+  } catch (error) {
+      console.error("Error during login: ", error);
+      alert(error.message);
+  }
       }
 
   

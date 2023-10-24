@@ -1,57 +1,83 @@
-import React, { useState, useEffect} from 'react';
-import {View, SafeAreaView, StyleSheet, Image, Text, Alert, TouchableOpacity} from 'react-native';
-//import {db} from '../../database/firebase'
-import { TextInput, Button} from 'react-native-paper'
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  Text,
+  Alert,
+  TouchableOpacity,
+  
+} from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
-import {auth} from '../../database/firebase'
+import { auth, db } from '../../database/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function Profile({navigation}){
-    //const auth = getAuth();
-    //const user = auth.currentUser;
-    
-    const [firstname, setFirstname] = useState('')
-    const [lastname, setLastname] = useState('')
-    const [email, setEmail] = useState('')
-    const [phone, setPhone] = useState('')
-    const [username, setUsername] = useState('')
-    const [imgUrl, setImgUrl] = useState('')
-    
-//    useEffect(()=>{
-//      db 
-//      .collection('UserData').doc(user.email).get().then(DocumentSnapshot => {
-//        if (DocumentSnapshot.exists){
-//          const udata = DocumentSnapshot.data()
-//          setUsername(udata.name)
-//          setEmail(udata.email)
-//          setFirstname(udata.firstName)
-//          setLastname(udata.lastName)
-//          setPhone(udata.phone)
-//          setImgUrl(udata.imageUrl)
-//        }
-//      })
-//    },[])
+export default function Profile({ navigation }) {
 
-    const handleSave =() =>{
 
-//        db
-//        .collection('UserData')
-//        .doc(user.email)
-//        .set({
-//          email: email,
-//          name: username,
-//          firstName: firstname,
-//          lastName: lastname,
-//          phone: phone,
-//          imageUrl: imgUrl
-//        })
-        Alert.alert('Update successfully!!')
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [username, setUsername] = useState('');
+    const [imgUrl, setImgUrl] = useState('');
+    const [imageKey, setImageKey] = useState(Date.now());
 
-    }
 
-    // This function is triggered when the profile image is pressed
+
+    useEffect(() => {
+        // Fetch user data from AsyncStorage on component mount
+        const fetchUserData = async () => {
+            try {
+                const storedData = await AsyncStorage.getItem('user_data');
+                if (storedData) {
+                    const udata = JSON.parse(storedData);
+                    setUsername(udata.username || '');
+                    setEmail(udata.email || '');
+                    setPhone(udata.phone || '');
+                    setImgUrl(udata.imgUrl || '');
+                }
+            } catch (error) {
+                console.error("Error fetching user data from AsyncStorage:", error);
+                Alert.alert('Error fetching user data. Please try again.');
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    const handleSave = async () => {
+        try {
+            const updateObj = {};
+            if (username) updateObj.name = username;
+            if (phone) updateObj.phone = phone;
+            if (imgUrl) updateObj.imgUrl = imgUrl;
+            console.log(imgUrl)
+            
+
+            // Update Firestore
+            await db.collection('UserData').doc(email).update(updateObj);
+
+            // Update AsyncStorage
+            const storedData = await AsyncStorage.getItem('user_data');
+            if (storedData) {
+                const udata = JSON.parse(storedData);
+                const updatedData = { ...udata, ...updateObj };
+                await AsyncStorage.setItem('user_data', JSON.stringify(updatedData));
+            }
+
+            Alert.alert('Update successfully!');
+        } catch (error) {
+            console.error("Error updating user data: ", error);
+            Alert.alert('Error updating data. Please try again.');
+        }
+    };
+
     const showImagePicker = async () => {
       // Ask the user for the permission to access the media library 
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+
 
       if (permissionResult.granted === false) {
         Alert.alert("You've refused to allow this appp to access your photos!");
@@ -64,11 +90,14 @@ export default function Profile({navigation}){
       console.log(result);
 
       if (!result.cancelled) {
-        setImgUrl(result.uri);
-        console.log(result.uri);
+        const imageUri = result.assets[0].uri;
+        setImgUrl(imageUri);
+        console.log(imageUri);
+        setImageKey(Date.now());
+        
+
       }
     }
-
     // This function is triggered when the "Open camera" button pressed
     const openCamera = async () => {
       // Ask the user for the permission to access the camera
@@ -85,25 +114,33 @@ export default function Profile({navigation}){
       console.log(result);
 
       if (!result.cancelled) {
-        setImgUrl(result.uri);
-        console.log(result.uri);
+        setImgUrl(result.assets[0].uri);
+        console.log(imgUrl);
+        setImageKey(Date.now());
       }
     }
+    
 
     return (
       <SafeAreaView style={{flex:1,backgroundColor: 'white'}}>
             <View style={styles.header}></View>
             
             <TouchableOpacity onPress={showImagePicker}>
-              <Image source={ imgUrl === '' ? 
-                require("../../assets/profile.png") : { uri: imgUrl }}
-                style={styles.avatar}
-              />
+            <Image
+              key={imageKey}  // Add the key prop here
+              source={imgUrl === '' ? require("../../assets/profile.png") : { uri: imgUrl }}
+              style={styles.avatar}
+            />
               
             </TouchableOpacity>
+
             <Text style={{alignSelf:'center', top:190}}>Tap Image for Change</Text>
-            <Text style={{fontSize: 28, fontWeight: 'bold', marginTop: 180, textAlign: 'center'}}> {username}</Text>
+            <View style={{alignSelf:'center', top:200}}>
+            <Text style={{fontSize: 28, fontWeight: 'bold', textAlign: 'center'}}> {username}</Text>
+            </View>
             
+            <View style={{ top:220}}>
+           
             <TextInput
                 style={{marginTop:20, width:'90%', alignSelf:'center'}}
                 mode="outlined"
@@ -118,19 +155,12 @@ export default function Profile({navigation}){
                 style={{marginTop:20, width:'90%', alignSelf:'center'}}
                 mode="outlined"
                 label="First Name"
-                value={firstname}
-                onChangeText={fn =>setFirstname(fn)}
+                value={username}
+                onChangeText={fn =>setUsername(fn)}
                 theme={{ colors: { primary: 'orange', placeholder: 'orange', underlineColor:'transparent', background:'white'}}}
             />
 
-            <TextInput
-                style={{marginTop:20, width:'90%', alignSelf:'center'}}
-                mode="outlined"
-                label="Last Name"
-                value={lastname}
-                onChangeText={ln =>setLastname(ln)}
-                theme={{ colors: { primary: 'orange', placeholder: 'orange', underlineColor:'transparent', background:'white'}}}
-            />
+
 
             <TextInput
                 style={{marginTop:20, width:'90%', alignSelf:'center'}}
@@ -155,6 +185,8 @@ export default function Profile({navigation}){
               onPress={() => auth.signOut().then(() => navigation.navigate('Signin'))}>
               Logout
             </Button>
+
+            </View>
 
       </SafeAreaView>
     );

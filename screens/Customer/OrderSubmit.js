@@ -39,7 +39,7 @@ export default OrderSubmit = ({ navigation }) => {
     const user = auth.currentUser;
 
     try {
-      await db.collection('Reservation').doc(user.email).set({
+      await db.collection('UserData').doc(user.email).collection('Reservation').add({
         ...udata,
         foodDetails: withFood ? cartData : []
       });

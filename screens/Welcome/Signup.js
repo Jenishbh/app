@@ -72,7 +72,8 @@ const Signup = ({navigation}) =>{
           .set({
             name: username,
             phone: phone,
-            email: email
+            email: email,
+            imgUrl: require("../../assets/profile.png")
           })
         
           console.log('User added!')
@@ -154,7 +155,7 @@ const Signup = ({navigation}) =>{
                 }} >
 
             <FormInput 
-              lable="email" KeyboardType='email-address'
+              lable="Email" KeyboardType='email-address'
               autoCompleteType='email'
               onChange={(value) => {
 
@@ -186,7 +187,7 @@ const Signup = ({navigation}) =>{
                />
 
                <FormInput
-               lable='Usename'
+               lable='Name'
                containerStyle={{
                 marginTop: 10
                }}
@@ -243,7 +244,7 @@ const Signup = ({navigation}) =>{
                />
 
                 <FormInput 
-               lable='password'
+               lable='Password'
                securetextEntry={!showPass}
                autoCompleteType='password'
                containerStyle={{
