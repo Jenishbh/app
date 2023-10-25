@@ -115,7 +115,7 @@ const BottomNavigator = ({ navigation }) => {
       />
       <Tab.Screen
         name="About"
-        component={Otp}
+        component={RegistrationHistory}
         options={{
           tabBarIcon: (color) => (
             <Con name="question" color={color} size={28} />
