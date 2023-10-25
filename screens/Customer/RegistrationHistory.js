@@ -1,7 +1,7 @@
 //want to retrive the registration history from firebase 
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, Image, SafeAreaView, View, TouchableOpacity } from 'react-native';
-import { db } from "../../database/firebase";
+import { auth,db } from "../../database/firebase";
 import Icon from 'react-native-vector-icons/Fontisto'
 import Icona from 'react-native-vector-icons/Ionicons'
 import Ico from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -14,7 +14,7 @@ const RegistrationHistory = ({navigation}) => {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const userEmail = "jenishpatelbh99@gmail.com";  // Replace with dynamic email if needed
+        const userEmail = auth.currentUser.email;  // Replace with dynamic email if needed
         const userDoc = db.collection('UserData').doc(userEmail);
         const reservationSnapshot = await userDoc.collection('Reservation').get();
         
