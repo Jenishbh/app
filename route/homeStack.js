@@ -31,6 +31,8 @@ import Otp from "../screens/Welcome/Otp";
 //import Tabnavigator from '../screens/Manager/Tabnavigator';
 import ReservationHome from "../screens/Customer/ReservationHome";
 import ReservationDetails from "../screens/Customer/ReservationDetails";
+import RegistrationHistory from "../screens/Customer/RegistrationHistory";
+import RegistrationDetails from "../screens/Customer/RegistrationDetails";
 
 //import Dashboard from '../screens/Manager/dash/dashboard';
 import CartScreen from "../screens/Customer/CartScreen";
@@ -41,8 +43,8 @@ import Confirm_res from "../screens/Customer/Confirm_res";
 //import Orderpage from '../screens/Manager/dash/Orderpage';
 //import Sales from '../screens/Manager/dash/sales';
 import OrderSubmit from "../screens/Customer/OrderSubmit";
-import Table_view from "../screens/Manager/manager_view_tables";
-import Manager_home from "../screens/Manager/manager_home";
+//import Table_view from "../screens/Manager/manager_view_tables";
+//import Manager_home from "../screens/Manager/manager_home";
 //
 //
 const Stack = createStackNavigator();
@@ -127,6 +129,8 @@ const BottomNavigator = ({ navigation }) => {
 const AuthNavigator = () => (
   <Stack.Navigator>
 
+
+
     
     <Stack.Screen
       name="Signin"
@@ -199,16 +203,19 @@ const AuthNavigator = () => (
       component={OrderSubmit}
       options={{ headerShown: false }}
     />
-    <Stack.Screen
-      name="Table_view"
-      component={Table_view}
+        <Stack.Screen
+      name="RegistrationHistory"
+
+      component={RegistrationHistory}
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Manager"
-      component={Manager_home}
+      name="RegistrationDetails"
+
+      component={RegistrationDetails}
       options={{ headerShown: false }}
     />
+
   </Stack.Navigator>
 );
 

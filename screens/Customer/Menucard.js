@@ -236,12 +236,13 @@ function Menucard({ navigation }) {
 
    },
    addtobtn:{
-    height: 30,
-    width: 30,
-    borderRadius: 30,
+    height: 28,
+    width: 28,
+    borderRadius: 20,
     backgroundColor: 'orange',
     justifyContent: 'center',
     alignItems: 'center',
+    
 
    }
   });

@@ -133,7 +133,7 @@ const Signin = ({ navigation }) => {
 
         <View
           style={{
-            marginTop: -30,
+            marginTop: -40,
 
           }} >
 
@@ -162,7 +162,7 @@ const Signin = ({ navigation }) => {
         <View
           style={{
             flex: 1,
-            marginTop: 24
+            marginTop: 14
           }}>
 
           {/* Form Input*/}
