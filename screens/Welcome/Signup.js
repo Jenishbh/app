@@ -75,7 +75,20 @@ const Signup = ({navigation}) =>{
             email: email,
             imgUrl: require("../../assets/profile.png")
           })
-        
+       
+          
+  
+          // Store the necessary details in AsyncStorage
+          await AsyncStorage.setItem('user_data', JSON.stringify({
+              email: email,
+              username: username,
+              phone: phone,
+              imgUrl: require("../../assets/profile.png")
+          }));
+    
+          
+          
+      
           console.log('User added!')
           navigation.navigate('Otp')
         }
