@@ -18,30 +18,32 @@ const ReservationDetails=({navigation, route})=>{
         const [count, setCount] = useState(0);
         const [currentDate, setCurrentDate] = useState('');
         const [selectedCategoryIndex, setselectedCategoryIndex] = useState(0);
-        const [userData, setUserData] = useState({});
+        const [username, setUsername] = useState({});
         //const auth = getAuth();
         //const user = auth.currentUser;
         useEffect(() => {
           setCurrentDate(new Date().toLocaleString());
-          const user = auth.currentUser;
-          if (user) {
-              fetchUserData(user.email);
-          }
+          
+          const fetchUserData = async () => {
+            try {
+                const storedData = await AsyncStorage.getItem('user_data');
+                if (storedData) {
+                    const udata = JSON.parse(storedData);
+                    setUsername(udata.username || '');
+                    
+                }
+            } catch (error) {
+                console.error("Error fetching user data from AsyncStorage:", error);
+                Alert.alert('Error fetching user data. Please try again.');
+            }
+        };
+
+        fetchUserData();
   
       }, []);
         
         //    {Counter function}
-        const fetchUserData = async (email) => {
-          try {
-              const userRef = db.collection('UserData').doc(email);
-              const doc = await userRef.get();
-              if (doc.exists) {
-                  setUserData(doc.data());
-              }
-          } catch (error) {
-              console.error("Error fetching user data: ", error);
-          }
-      };
+
           function Counter(){
             
             
@@ -116,7 +118,7 @@ const ReservationDetails=({navigation, route})=>{
             try {
 
               const reservationData = {
-                Name: `${userData.username}`,
+                Name: username,
                 Date: currentDate,
                 Table_Type: item.name,
                 Number_of_People: count

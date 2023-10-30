@@ -14,7 +14,7 @@ function Menucard({ navigation }) {
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
     const [filteredList, setFilteredList] = useState(foods);
     const [imgUrl, setImgUrl] = useState();
-    const [firstname, setFirstname] = useState('');
+    const [username, setUsername] = useState('');
     
     useEffect(() => {
       const currentCategory = categories[selectedCategoryIndex];
@@ -24,6 +24,22 @@ function Menucard({ navigation }) {
       } else {
           setFilteredList(foods);  // If no category is selected, show all foods
       }
+
+      const fetchUserData = async () => {
+        try {
+            const storedData = await AsyncStorage.getItem('user_data');
+            if (storedData) {
+                const udata = JSON.parse(storedData);
+                setUsername(udata.username || '');
+                setImgUrl(udata.imgUrl || '');
+            }
+        } catch (error) {
+            console.error("Error fetching user data from AsyncStorage:", error);
+            Alert.alert('Error fetching user data. Please try again.');
+        }
+    };
+
+    fetchUserData();
     }, [selectedCategoryIndex]);
   
     const onSearch = useCallback((text) => {
@@ -122,7 +138,7 @@ function Menucard({ navigation }) {
                     <Text style={{ flexDirection: 'row' }}>
                         <Text style={{ fontSize: 28 }}>Hello, </Text>
                         <Text style={{ fontSize: 28, fontWeight: 'bold', marginLeft: 10 }}>
-                            {firstname} 
+                            {username} 
                         </Text>
                     </Text>
                     <Text style={{ marginTop: 5, fontSize: 22, color: '#FEDAC5' }}>

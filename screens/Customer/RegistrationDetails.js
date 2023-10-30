@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, FlatList  } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, FlatList, SafeAreaView  } from 'react-native';
 import Icon from 'react-native-vector-icons/Fontisto';
 import Icona from 'react-native-vector-icons/Ionicons';
 import Ico from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,7 +17,7 @@ function RegistrationDetails({ route }) {
 
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image source={require('../../assets/table/gen_tab.jpg')} style={styles.image} />
       <View style={styles.contentContainer}>
         <Text style={styles.title}>{reservation.Table_Type}</Text>
@@ -40,7 +40,7 @@ function RegistrationDetails({ route }) {
         />
       
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
