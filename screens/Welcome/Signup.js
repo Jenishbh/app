@@ -7,7 +7,7 @@ import { PrimaryButton, SecondButton } from '../../components/Button'
 
 import {db,auth} from '../../database/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
-
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 
