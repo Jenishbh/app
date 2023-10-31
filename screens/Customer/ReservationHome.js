@@ -30,34 +30,6 @@ function ReservationHome({navigation}) {
   //  })
   //},[])
 
-  useEffect(() => {
-    
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      if (user) {
-        // User is signed in
-        db.collection('UserData').doc(user.email).get()
-          .then(DocumentSnapshot => {
-            if (DocumentSnapshot.exists) {
-              const udata = DocumentSnapshot.data();
-              setFirstname(udata.firstName);
-              setImgUrl(udata.imageUrl);
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching user data:", error);
-          });
-      } else {
-        // User is signed out
-        setFirstname('');
-        setImgUrl(undefined);
-      }
-    });
-
-    // Cleanup function
-    return () => {
-      unsubscribe();
-    };
-  }, []);
 
   // ... rest of your component
 

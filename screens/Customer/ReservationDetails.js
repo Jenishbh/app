@@ -1,5 +1,5 @@
 import React,{useState, useEffect}from "react";
-import { View,Image, Text, StyleSheet,  TextInput, ScrollView, TouchableOpacity,Dimensions } from "react-native";
+import { View,Image, Text, StyleSheet,  TextInput, ScrollView, TouchableOpacity,Dimensions, Alert, Button } from "react-native";
 import {PrimaryButton} from "../../components/Button";
 import Watch from '../Menu/Time';
 import Icona from 'react-native-vector-icons/FontAwesome5' 
@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Table from "../Menu/Table";
 //import firebase from "firebase/compat";
 //import { Manager_db } from '../../database/ManagerFirebase'
-
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const ReservationDetails=({navigation, route})=>{
 
@@ -19,6 +19,14 @@ const ReservationDetails=({navigation, route})=>{
         const [currentDate, setCurrentDate] = useState('');
         const [selectedCategoryIndex, setselectedCategoryIndex] = useState(0);
         const [username, setUsername] = useState({});
+        const [date, setDate] = useState(new Date());
+        const [show, setShow] = useState(false);
+
+        const onChange = (event, selectedDate) => {
+          const currentDate = selectedDate || date;
+          
+          setDate(currentDate);
+        };
         //const auth = getAuth();
         //const user = auth.currentUser;
         useEffect(() => {
@@ -115,6 +123,8 @@ const ReservationDetails=({navigation, route})=>{
             }
           };
           const handlebook =  () => {
+            if (count > 0) {
+              
             try {
 
               const reservationData = {
@@ -137,6 +147,9 @@ const ReservationDetails=({navigation, route})=>{
                 alert(`Failed to add reservation: ${error.message}`);
             }
         }
+        else {
+          Alert.alert('Please Add Enough Guest')
+        }}
         
         const ListCategories =()=>{
           
@@ -191,7 +204,60 @@ const ReservationDetails=({navigation, route})=>{
 
 
 // or whatever library you're using for icons
+function DateAndTimePicker() {
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
 
+  const getUpcomingWeek = () => {
+    const result = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        result.push({
+            day: dayName,
+            date: date.getDate()
+        });
+    }
+    return result;
+};
+
+
+
+
+const dates = getUpcomingWeek();
+  const times = ['5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM'];
+
+    return (
+        <View style={style.container}>
+            <Text>Pick a Date</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {dates.map((item, index) => (
+                    <TouchableOpacity 
+                        key={index} 
+                        style={[style.dateItem, item.date === selectedDate && style.selected]}
+                        onPress={() => setSelectedDate(item.date)}
+                    >
+                        <Text>{`${item.date} ${item.day}`}</Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+
+            <Text>Pick a Time</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {times.map((time, index) => (
+                    <TouchableOpacity 
+                        key={index} 
+                        style={[style.timeItem, time === selectedTime && style.selected]}
+                        onPress={() => setSelectedTime(time)}
+                    >
+                        <Text>{time}</Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+        </View>
+    );
+}
 const List = () => { // Don't forget to pass the 'item' prop to List when you use it
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal:10, flex:1 }}>
@@ -286,6 +352,8 @@ const List = () => { // Don't forget to pass the 'item' prop to List when you us
                  
 
                     <Counter />
+                    
+                    <DateAndTimePicker />
                  
 
                  
@@ -369,6 +437,25 @@ categorryBtnn:{
     justifyContent: 'center',
     alignContent: 'center',
    },
+   container: {
+    flex: 1,
+    padding: 16,
+},
+dateItem: {
+    marginRight: 8,
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#EDEDED',
+},
+timeItem: {
+    marginRight: 8,
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#EDEDED',
+},
+selected: {
+    backgroundColor: '#D1E8FF',
+}
   
 })
 
