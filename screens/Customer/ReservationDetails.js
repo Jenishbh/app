@@ -1,36 +1,31 @@
 import React,{useState, useEffect}from "react";
 import { View,Image, Text, StyleSheet,  TextInput, ScrollView, TouchableOpacity,Dimensions, Alert, Button } from "react-native";
 import {PrimaryButton} from "../../components/Button";
-import Watch from '../Menu/Time';
+
 import Icona from 'react-native-vector-icons/FontAwesome5' 
 import Icon from 'react-native-vector-icons/Ionicons'
-import {db,auth} from '../../database/firebase'
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Table from "../Menu/Table";
+
 //import firebase from "firebase/compat";
 //import { Manager_db } from '../../database/ManagerFirebase'
-import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 const ReservationDetails=({navigation, route})=>{
 
 
         const item = route.params;
         const [count, setCount] = useState(0);
-        const [currentDate, setCurrentDate] = useState('');
-        const [selectedCategoryIndex, setselectedCategoryIndex] = useState(0);
+        
         const [username, setUsername] = useState({});
-        const [date, setDate] = useState(new Date());
-        const [show, setShow] = useState(false);
+        const [selectedDate, setSelectedDate] = useState('');
+        const [selectedTime, setSelectedTime] = useState('');
 
-        const onChange = (event, selectedDate) => {
-          const currentDate = selectedDate || date;
-          
-          setDate(currentDate);
-        };
+
         //const auth = getAuth();
         //const user = auth.currentUser;
         useEffect(() => {
-          setCurrentDate(new Date().toLocaleString());
+         
           
           const fetchUserData = async () => {
             try {
@@ -68,14 +63,16 @@ const ReservationDetails=({navigation, route})=>{
               };
             
               return (
-                <View style={{marginHorizontal: 20, marginVertical:20, flexDirection: 'row', justifyContent:'space-between'}}  >
+                <View style={{marginHorizontal: 5, marginVertical:20, flexDirection: 'row',}}  >
                 <Text style={{fontWeight: 'bold'}} > Number Of Persons</Text>
-                    <View style={{alignSelf:'baseline'}}>
-                    <Icona name='minus' size={18}  onPress={removeCountHandler}/>
+                    <View style={{marginHorizontal:50}}>
+                    <TouchableOpacity onPress={removeCountHandler} style={{padding:10, margin:-10}}>
+                    <Icona name='minus' size={18}  /></TouchableOpacity>
                     </View>
                     <Text >{count}</Text>
-                    <View > 
-                    <Icona name='plus' size={18}  onPress={addCountHandler}/>
+                    <View style={{marginHorizontal:50}}>
+                      <TouchableOpacity onPress={addCountHandler} style={{padding:10, margin:-10}}>
+                    <Icona name='plus' size={18}   /></TouchableOpacity>
 
                     </View>
                     </View>
@@ -122,91 +119,40 @@ const ReservationDetails=({navigation, route})=>{
               console.error("Error saving reservation data to AsyncStorage:", error);
             }
           };
-          const handlebook =  () => {
-            if (count > 0) {
-              
-            try {
+          const handlebook = async () => {
+            if (count > 0 & selectedDate != null & selectedTime != null) {
+                try {
+                    const reservationData = {
+                        Name: username,
+                        Date: selectedDate,
+                        
+                        Time: selectedTime,
+                        Table_Type: item.name,
+                        Number_of_People: count
+                    };
+                    
 
-              const reservationData = {
-                Name: username,
-                Date: currentDate,
-                Table_Type: item.name,
-                Number_of_People: count
-            };
-              storeReservationDetails(reservationData);
-
-              // Navigate to the OrderSubmit screen or any other logic you have:
-              navigation.navigate('OrderSubmit');
-                //adding thease data not to firebase and fpusing them to order submit page 
-                //await db.collection('Reservation').add(reservationData);
-                //console.log('Reservation added successfully');
-               // navigation.navigate('Confirm_res', Table)
-                // Optionally, navigate the user to a different screen or show a success message.
-            } catch (error) {
-                console.error("Error adding reservation: ", error);
-                alert(`Failed to add reservation: ${error.message}`);
+                    // Assuming storeReservationDetails is an async function
+                    await storeReservationDetails(reservationData);
+                    navigation.navigate('OrderSubmit');
+                     // or any other notification method
+                } catch (error) {
+                    console.error("Failed to store reservation:", error);
+                    alert("Error occurred while trying to book. Please try again.");
+                }
+            } else {
+                alert("Opps! Somthing Missing.");
             }
         }
-        else {
-          Alert.alert('Please Add Enough Guest')
-        }}
         
-        const ListCategories =()=>{
-          
-        
-      return(
 
-        <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={style.catagoriesListContainer}
-        >
-
-          {Watch.map((category,index)=>(
-
-            <TouchableOpacity 
-            key={index} 
-            activeOpacity={0.8}
-            onPress={()=> setselectedCategoryIndex(index)} 
-            >
-
-              <View style={{
-                backgroundColor:selectedCategoryIndex == index 
-                ? 'orange' 
-                : '#FEDAC5',
-                ...style.categorryBtn
-                }}>
-
-                  
-
-                  <Text 
-                    style={{fontSize:15,
-                       fontWeight: 'bold',
-                        marginLeft: 10,
-                         color: selectedCategoryIndex == index
-                          ? 'white' 
-                          : 'orange'
-                           }}>
-                    {category.tme}
-                  </Text>
-
-                </View>
-
-            </TouchableOpacity>
-          ))}
-
-        </ScrollView>
-      )
-    }
 
 
 
 
 
 // or whatever library you're using for icons
-function DateAndTimePicker() {
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
+const DateAndTimePicker = ({selectedDate, setSelectedDate, selectedTime, setSelectedTime}) => {
 
   const getUpcomingWeek = () => {
     const result = [];
@@ -220,9 +166,24 @@ function DateAndTimePicker() {
         });
     }
     return result;
-};
-
-
+  };
+  const handleTimeChange = (dateValue) => {
+    if (selectedTime === dateValue) {
+        setSelectedTime(null);
+    } else {
+        setSelectedTime(dateValue);
+        console.log(dateValue);
+    }
+}
+  const handleDateChange = (dateValue) => {
+    console.log(dateValue);
+    if (selectedDate === dateValue) {
+        setSelectedDate(null);
+        
+    } else {
+        setSelectedDate(dateValue);
+    }
+  }
 
 
 const dates = getUpcomingWeek();
@@ -230,34 +191,42 @@ const dates = getUpcomingWeek();
 
     return (
         <View style={style.container}>
-            <Text>Pick a Date</Text>
+          <View >
+            <Text style={{textAlign: 'left', marginVertical:20,  fontWeight:'bold'}} >Pick a Date</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {dates.map((item, index) => (
                     <TouchableOpacity 
-                        key={index} 
-                        style={[style.dateItem, item.date === selectedDate && style.selected]}
-                        onPress={() => setSelectedDate(item.date)}
-                    >
-                        <Text>{`${item.date} ${item.day}`}</Text>
-                    </TouchableOpacity>
+                    key={index} 
+                    style={[style.dateItem, item.day === selectedDate && style.selected]}
+                    onPress={() => handleDateChange(item.day, item.date)}
+                >
+                    <Text>{`${item.date} ${item.day}`}</Text>
+                </TouchableOpacity>
                 ))}
             </ScrollView>
-
-            <Text>Pick a Time</Text>
+            </View>
+            <View style={{paddingVertical:20}}>
+            <Text style={{textAlign: 'left', marginVertical:20,  fontWeight:'bold'}}>Pick a Time</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {times.map((time, index) => (
                     <TouchableOpacity 
-                        key={index} 
-                        style={[style.timeItem, time === selectedTime && style.selected]}
-                        onPress={() => setSelectedTime(time)}
-                    >
-                        <Text>{time}</Text>
-                    </TouchableOpacity>
+                    key={index} 
+                    style={[style.timeItem, time === selectedTime && style.selected]}
+                    onPress={()=>handleTimeChange(time)}
+                >
+                    <Text>{time}</Text>
+                </TouchableOpacity>
                 ))}
             </ScrollView>
+            </View>
         </View>
     );
 }
+
+
+
+
+
 const List = () => { // Don't forget to pass the 'item' prop to List when you use it
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal:10, flex:1 }}>
@@ -343,9 +312,9 @@ const List = () => { // Don't forget to pass the 'item' prop to List when you us
                 </View>                   
                 </View>
 
-                <View style={{marginHorizontal: 10, justifyContent: 'space-between', paddingHorizontal: 1, paddingVertical: 10, }}>
-                <Text style={{fontSize:16, fontWeight:'bold',}}> Details</Text>
-                <Text style={{fontSize:14, color: 'gray', alignSelf:'flex-start', paddingTop: 10}}> Seize the Momemt. Meet Spark,a mini drone that features all of DJI's signature technologies, allowing you to size the moment whenever you feel inspired </Text>
+                <View style={{marginHorizontal: 8, paddingVertical: 10, }}>
+                <Text style={{fontSize:16, fontWeight:'bold',}}>Details</Text>
+                <Text style={{fontSize:14, color: 'gray', alignSelf:'flex-start', paddingTop: 10}}>Seize the Momemt. Meet Spark,a mini drone that features all of DJI's signature technologies, allowing you to size the moment whenever you feel inspired </Text>
                  
                  </View>
 
@@ -353,19 +322,23 @@ const List = () => { // Don't forget to pass the 'item' prop to List when you us
 
                     <Counter />
                     
-                    <DateAndTimePicker />
+                    <DateAndTimePicker
+                    selectedDate={selectedDate} 
+                    setSelectedDate={setSelectedDate} 
+                    selectedTime={selectedTime} 
+                    setSelectedTime={setSelectedTime}  />
                  
 
                  
 
-                 <View style={{marginHorizontal: 20, marginVertical:20, paddingVertical: 20}}>
+                 <View style={{marginHorizontal: 8, marginVertical:20, paddingVertical: 20}}>
 
-                 <Text style={{fontWeight: 'bold'}} > AddComments</Text>
+                 <Text style={{fontWeight: 'bold'}} >Add Comments</Text>
 
-                 <TextInput style={{height:100, width:350,borderRadius: 15,
-                 backgroundColor: 'white',borderColor:'white',  shadowColor: 'gray', shadowOffset: {height: 4, width:-2}, shadowOpacity: 0.2, shadowRadius: 3
+                 <TextInput style={{height:100, width:350,borderRadius: 15, marginVertical:5,
+                 backgroundColor: 'white',borderColor:'white',  shadowColor: 'gray', shadowOffset: {height: 4, width:0}, shadowOpacity: 0.2, shadowRadius: 3
                  
-                 }} placeholder='Write Comments' />
+                 }} placeholder=' Write Comments' />
 
                  </View>
 
@@ -439,19 +412,32 @@ categorryBtnn:{
    },
    container: {
     flex: 1,
-    padding: 16,
+    padding: 8,
+    
 },
 dateItem: {
-    marginRight: 8,
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: '#EDEDED',
+  marginHorizontal: 8,
+  paddingVertical: 10,
+  paddingHorizontal: 15,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: 'lightgray', // you can adjust this as per your preference
+  alignItems: 'center',
+  justifyContent: 'center',
+  
+    
+    
 },
 timeItem: {
-    marginRight: 8,
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: '#EDEDED',
+  marginHorizontal: 8,
+  paddingVertical: 5,
+  paddingHorizontal: 15,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: '#D3D3D3', // you can adjust this as per your preference
+  alignItems: 'center',
+  justifyContent: 'center',
+  
 },
 selected: {
     backgroundColor: '#D1E8FF',
