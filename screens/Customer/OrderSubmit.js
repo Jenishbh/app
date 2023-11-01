@@ -93,7 +93,8 @@ export default OrderSubmit = ({ navigation }) => {
             <Text style={styles.headerText}>Your Table has been Reserved</Text>
         </View>
 
-        {renderInfo('clock', 'Date', udata.Date)}
+        {renderInfo('date', 'Date', udata.Date)}
+        {renderInfo('clock', 'Date', udata.Time)}
         {renderInfo('diningTable', 'Table_Type', udata.Table_Type)}
         {renderInfo('people', 'Number_of_People', udata.Number_of_People)}
 
@@ -125,6 +126,8 @@ const images = {
   clock: require('../../assets/order/clock.png'),
   diningTable: require('../../assets/order/dining-table.png'),
   people: require('../../assets/data/people.png'),
+  date: require('../../assets/table/reservation.png'),
+
 };
 const styles = StyleSheet.create({
   container: {
