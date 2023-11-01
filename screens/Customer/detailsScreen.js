@@ -1,7 +1,8 @@
 import { Text, View, SafeAreaView, StyleSheet,  Image, ScrollView,Alert , Animated} from 'react-native'
 import React, {useState,useEffect} from 'react'
-import Icon from 'react-native-vector-icons/MaterialIcons'
 import {SecondButton} from '../../components/Button'
+import Icon from 'react-native-vector-icons/MaterialIcons'
+import Icona from 'react-native-vector-icons/MaterialCommunityIcons'
 //import {db} from '../../database/firebase'
 //import { getAuth } from "firebase/auth";
 
@@ -83,87 +84,173 @@ const DetailsScreen = ({navigation, route})=>{
 
     }
 
-    return(
-    <SafeAreaView style={{backgroundColor: 'white'}}>
+    return (
+        <SafeAreaView style={styles.container}>
 
-        <View style={style.header} >
-
-            <Icon name ='arrow-back-ios' size={28} onPress={navigation.goBack}/>
-            <Text style={{fontSize: 20, fontWeight: 'bold' }} onPress={navigation.goBack}>Details</Text>
-        </View>
-
-        <ScrollView showsVerticalScrollIndicator ={false}>
-            <View 
-            style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 280,
-
-            }}>
-                <Image source={item.image} style={{height: 220, width: 220,borderRadius:30 }}/>
+            <View style={styles.header}>
+                <Icon name='arrow-back-ios' size={28} onPress={navigation.goBack} />
+                <Text style={styles.headerText} onPress={navigation.goBack}>Details</Text>
             </View>
-            <View style={style.details}>
-                <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 
-                    <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white' }}>{item.name}</Text>
-                    <View style={style.iconContaioner}> 
-                    <Icon name='favorite-border' color={'orange'} size={25} />
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                
+                <View style={styles.imageContainer}>
+                    <Image source={item.image} style={styles.image} />
+                </View>
+                
+                <View style={styles.details}>
+                    {/* Name and Favorite Icon */}
+                    <View style={styles.nameFavoriteContainer}>
+                        <Text style={styles.foodName}>{item.name}</Text>
+                        <View style={styles.iconContainer}>
+                            <Icon name='favorite-border' color={'orange'} size={25} />
+                        </View>
                     </View>
-                    </View>
-                    <Text style={style.detailsText}>
-                        {item.details}
-                    </Text>
 
-                    <View style={{marginTop: 80, marginBottom: 40 }}>
-                        <SecondButton title='Add to Cart'
-                        btnContainer={{
-                            height:50,
-                            width:250,
-                            alignSelf:'center',
-                            
-                        }} onPress={handlebook}/>
+                    {/* Person and Time Icons */}
+                    <View style={styles.personTimeContainer}>
+                        <Icon name="person" size={25} color="gray" />
+                        <Text style={styles.iconText}>3 person</Text>
+                        <Icon name="more-time" size={25} color="gray" style={styles.timeIcon} />
+                        <Text style={styles.iconText}>00:20</Text>
+                    </View>
+
+                    {/* Details and Price */}
+                    <Text style={styles.detailsText}>{item.details}</Text>
+                    <Text style={styles.priceText}>$ {item.price}</Text>
+
+                    {/* Ingredients */}
+                    <View style={styles.ingredientsContainer}>
+                        <Text style={styles.ingredientsTitle}>Ingredients</Text>
+                        <View style={styles.ingredientRow}>
+                            {item.ingredients && item.ingredients.split(', ').map((ingredient, index) => (
+                                <View key={index} style={styles.ingredientItem}>
+                                    <Text style={styles.ingredientText}>{ingredient.trim()}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Add to Cart Button */}
+                    <View style={styles.buttonContainer}>
+                        <SecondButton title='Add to Cart' btnContainer={styles.addButton} onPress={handlebook} />
                     </View>
                 </View>
-           
-        </ScrollView>
 
-    </SafeAreaView>
-)}
+            </ScrollView>
 
+        </SafeAreaView>
+    );
+}
 
-const style = StyleSheet.create({ 
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: 'white',
+        flex: 1
+    },
     header: {
         paddingVertical: 20,
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal : 20
+        marginHorizontal: 20
+    },
+    headerText: {
+        fontSize: 20,
+        fontWeight: 'bold'
+    },
+    scrollView: {
+        flex: 1
+    },
+    imageContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 200,
+    },
+    image: {
+        height: 180,
+        width: 180,
+        borderRadius: 30
     },
     details: {
-        paddingHorizontal: 20,
-        paddingBottom: 60,
-        paddingTop: 40,
-        backgroundColor: 'orange',
-        borderTopRightRadius: 40,
-        borderTopLeftRadius: 40,
-
+        margin: 5
     },
-
-    iconContaioner: {
+    nameFavoriteContainer: {
+        alignItems: 'center'
+    },
+    foodName: {
+        fontSize: 20,
+        fontWeight: '500',
+        color: 'lightblue'
+    },
+    iconContainer: {
         backgroundColor: 'white',
         height: 50,
         width: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 30,
-
+        borderRadius: 30
     },
-    detailsText:{
-        marginTop:10,
+    personTimeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    iconText: {
+        marginLeft: 5,
+        color: 'gray'
+    },
+    timeIcon: {
+        marginLeft: 20
+    },
+    detailsText: {
+        marginTop: 10,
         lineHeight: 22,
-        fontSize:16,
-        color: 'white',
-        
+        fontSize: 16,
+        color: 'gray',
+        marginHorizontal:8
+    },
+    priceText: {
+        fontSize: 22,
+        fontWeight: '600',
+        textAlign: 'center',
+        marginVertical: 10
+    },
+    ingredientsContainer: {
+        backgroundColor: 'white',
+        marginHorizontal: 8
+    },
+    ingredientsTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 10
+    },
+    ingredientRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+    },
+    ingredientItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        justifyContent: 'space-between',
+        margin: 5
+    },
+    ingredientText: {
+        marginLeft: 5,
+        color: 'gray'
+    },
+    buttonContainer: {
+        marginTop: 20,
+        marginBottom: 40
+    },
+    addButton: {
+        height: 50,
+        width: 250,
+        alignSelf: 'center',
+        backgroundColor: 'lightblue'
     }
-})
+});
 
 export default DetailsScreen;
