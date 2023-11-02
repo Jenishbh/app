@@ -2,7 +2,7 @@ import { Text, View, SafeAreaView, StyleSheet,  Image, ScrollView,Alert , Animat
 import React, {useState,useEffect} from 'react'
 import {SecondButton} from '../../components/Button'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import Icona from 'react-native-vector-icons/MaterialCommunityIcons'
+import { icons } from '../Menu/food'
 //import {db} from '../../database/firebase'
 //import { getAuth } from "firebase/auth";
 
@@ -120,16 +120,24 @@ const DetailsScreen = ({navigation, route})=>{
                     <Text style={styles.priceText}>$ {item.price}</Text>
 
                     {/* Ingredients */}
+                    {/* Ingredients */}
                     <View style={styles.ingredientsContainer}>
                         <Text style={styles.ingredientsTitle}>Ingredients</Text>
                         <View style={styles.ingredientRow}>
-                            {item.ingredients && item.ingredients.split(', ').map((ingredient, index) => (
-                                <View key={index} style={styles.ingredientItem}>
-                                    <Text style={styles.ingredientText}>{ingredient.trim()}</Text>
-                                </View>
-                            ))}
+                            {item.ingredients && item.ingredients.split(',').map((ingredient, index) => {
+                                
+                                const icon = icons.find(i => i.name.toLowerCase() === ingredient.trim().toLowerCase());
+
+                                return (
+                                    <View key={index} style={styles.ingredientItem}>
+                                        {icon && <Image source={icon.image} style={styles.ingredientIcon} />} 
+                                        <Text style={styles.ingredientText}>{ingredient.trim()}</Text>
+                                    </View>
+                                );
+                            })}
                         </View>
                     </View>
+
 
                     {/* Add to Cart Button */}
                     <View style={styles.buttonContainer}>
@@ -250,7 +258,12 @@ const styles = StyleSheet.create({
         width: 250,
         alignSelf: 'center',
         backgroundColor: 'lightblue'
-    }
+    },
+    ingredientIcon: {
+        width: 20,   // Width of the icon
+        height: 20,  // Height of the icon
+        marginRight: 5, // Space between the icon and the text
+    },
 });
 
 export default DetailsScreen;
