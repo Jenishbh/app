@@ -110,9 +110,9 @@ const DetailsScreen = ({navigation, route})=>{
                     {/* Person and Time Icons */}
                     <View style={styles.personTimeContainer}>
                         <Icon name="person" size={25} color="gray" />
-                        <Text style={styles.iconText}>3 person</Text>
+                        <Text style={styles.iconText}>{item.person}</Text>
                         <Icon name="more-time" size={25} color="gray" style={styles.timeIcon} />
-                        <Text style={styles.iconText}>00:20</Text>
+                        <Text style={styles.iconText}>{item.duration}</Text>
                     </View>
 
                     {/* Details and Price */}
