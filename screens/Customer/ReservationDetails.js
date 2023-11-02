@@ -198,7 +198,7 @@ const dates = getUpcomingWeek();
                     <TouchableOpacity 
                     key={index} 
                     style={[style.dateItem, item.day === selectedDate && style.selected]}
-                    onPress={() => handleDateChange(item.day, item.date)}
+                    onPress={() => handleDateChange(item.day)}
                 >
                     <Text>{`${item.date} ${item.day}`}</Text>
                 </TouchableOpacity>
