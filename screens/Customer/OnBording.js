@@ -38,31 +38,11 @@ const onboarding_screens = [
 ]
 
 
-const OnBording= ({navigation}) =>{
+const OnBording= () =>{
 
     const scrollX = React.useRef (new Animated.Value(0)).current
     const [loading, setLoading] = React.useState(false);
-    const handleDone = async () => {
-        try {
-          setLoading(true);
-          if (!database) {
-            console.error('Firebase is not properly initialized');
-            return;
-          }
-          
-          const user = auth.currentUser;
-          if (user) {
-            const encodedEmail = user.email.replace('@', '_at_').replace(/\./g, '_dot_');
-            const userRef = database.ref('users/' + encodedEmail);
-            await userRef.update({ hasCompletedOnboarding: true });
-            navigation.navigate('Home'); // Navigate to the main app screen after updating the user data
-          } else {
-            console.error('No user is signed in');
-          }
-        } catch (error) {
-          console.error('Error updating user data: ', error);
-        } finally { setLoading (false) }
-      };
+    
     
 
     const Dots=()=>{

@@ -3,7 +3,8 @@ import { Text, View, SafeAreaView, Image, StyleSheet, TextInput, Alert} from 're
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { PrimaryButton, SecondButton } from '../../components/Button';
 import firebase from 'firebase/compat/app';
-
+import { db } from '../../database/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Otp = ({ navigation }) => {
@@ -11,7 +12,7 @@ const Otp = ({ navigation }) => {
     const [checkInterval, setCheckInterval] = useState(null);
     const [shouldCheck, setShouldCheck] = useState(true); 
     const [lastChecked, setLastChecked] = useState(null);
-
+    const storedData = AsyncStorage.getItem('user_data');
     const checkVerification = () => {
         const user = firebase.auth().currentUser;
         setLastChecked(new Date());
@@ -22,6 +23,17 @@ const Otp = ({ navigation }) => {
                 if (user.emailVerified) {
                     setIsVerified(true);
                     clearInterval(checkInterval);
+                    db
+                    .collection('UserData')
+                    .doc(storedData.email)
+                    .set({
+                      name: storedData.username,
+                      phone: storedData.phone,
+                      email: storedData.email,
+                      imgUrl: require("../../assets/profile.png")
+                    })
+                 
+
                 }
             }).catch(error => {
                 console.error("Error reloading user data:", error);

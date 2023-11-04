@@ -64,20 +64,6 @@ const Signup = ({navigation}) =>{
             console.log('User creation might not have been successful.');
         }
             
-          
-  
-          await db
-          .collection('UserData')
-          .doc(email)
-          .set({
-            name: username,
-            phone: phone,
-            email: email,
-            imgUrl: require("../../assets/profile.png")
-          })
-       
-          
-  
           // Store the necessary details in AsyncStorage
           await AsyncStorage.setItem('user_data', JSON.stringify({
               email: email,
@@ -85,11 +71,7 @@ const Signup = ({navigation}) =>{
               phone: phone,
               imgUrl: require("../../assets/profile.png")
           }));
-    
-          
-          
-      
-          console.log('User added!')
+
           navigation.navigate('Otp')
         }
         catch(error) {alert('Error adding user data: ',error.message)
