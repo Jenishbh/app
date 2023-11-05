@@ -37,18 +37,45 @@ export default OrderSubmit = ({ navigation }) => {
   const saveReservation = async (withFood = false) => {
     const auth = getAuth();
     const user = auth.currentUser;
-
+  
+    // Assuming `udata` contains `reservationDate` and `reservationTime`
+    // which are strings in a format that can be used to construct a Date object.
+    // Example: '2023-11-04' and '14:00' (2 PM)
+    const reservationStart = new Date(`${udata.Date}T${udata.Time}`);
+    const reservationEnd = new Date(reservationStart.getTime() + (60 * 60 * 1000)); // Reservation end time (one hour later)
+  
     try {
+      // Reference to the specific table document
+      const tableRef = db.collection('Tables').doc(`${udata.tableType}_table_${udata.tableCount}`);
+      
+      // Update the table's document with the current reservation
+      await tableRef.set({
+        currentReservation: {
+          startTime: reservationStart,
+          endTime: reservationEnd,
+          user: user.email,
+          foodDetails: withFood ? cartData : []
+        }
+      }, { merge: true });
+  
+      // Add a reservation record to the user's collection
       await db.collection('UserData').doc(user.email).collection('Reservation').add({
         ...udata,
-        foodDetails: withFood ? cartData : []
+        tableRef: tableRef.path,
+        startTime: reservationStart,
+        endTime: reservationEnd,
+        foodDetails: withFood ? cartData : [],
+        status: "reserved"
       });
+  
       console.log("Reservation saved successfully!");
       navigation.replace('Confirm_res');
     } catch (error) {
-      console.error("Error saving reservation: ", error);
+      console.error("Error saving reservation:", error);
     }
   };
+  
+  
 
   const handleCheckout = () => {
     Alert.alert(
