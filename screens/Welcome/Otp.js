@@ -12,36 +12,47 @@ const Otp = ({ navigation }) => {
     const [checkInterval, setCheckInterval] = useState(null);
     const [shouldCheck, setShouldCheck] = useState(true); 
     const [lastChecked, setLastChecked] = useState(null);
-    const storedData = AsyncStorage.getItem('user_data');
-    const checkVerification = () => {
+    
+    const checkVerification = async () => {
         const user = firebase.auth().currentUser;
         setLastChecked(new Date());
         if (user) {
-            // Force reload the user data from Firebase
-            user.reload().then(() => {
-                console.log("User email verified status:", user.emailVerified);
-                if (user.emailVerified) {
-                    setIsVerified(true);
-                    clearInterval(checkInterval);
-                    db
-                    .collection('UserData')
-                    .doc(storedData.email)
-                    .set({
-                      name: storedData.username,
-                      phone: storedData.phone,
-                      email: storedData.email,
-                      imgUrl: require("../../assets/profile.png")
-                    })
-                 
-
+          try {
+            await user.reload();
+            console.log("User email verified status:", user.emailVerified);
+            if (user.emailVerified) {
+              setIsVerified(true);
+              clearInterval(checkInterval);
+      
+              try {
+                const storedDataString = await AsyncStorage.getItem('user_data');
+                if (storedDataString !== null) {
+                  const storedData = JSON.parse(storedDataString);
+                  // Since `require` cannot be used dynamically and you cannot store a local asset in Firestore,
+                  // you should host your image somewhere and use the URL here.
+                  const imageUrl = require("../../assets/profile.png")
+                  await db.collection('UserData').doc(storedData.email).set({
+                    name: storedData.username,
+                    phone: storedData.phone,
+                    email: storedData.email,
+                    imgUrl: imageUrl
+                  });
+                  console.log('User data updated in Firestore');
+                } else {
+                  console.log('No data found in AsyncStorage');
                 }
-            }).catch(error => {
-                console.error("Error reloading user data:", error);
-            });
+              } catch (error) {
+                console.error('Error retrieving user data:', error);
+              }
+            }
+          } catch (error) {
+            console.error("Error reloading user data:", error);
+          }
         } else {
-            console.log("No user currently authenticated.");
+          console.log("No user currently authenticated.");
         }
-    };
+      };
+      
 
     useEffect(() => {
         // Set up periodic checks every 10 seconds only if the email is not verified yet

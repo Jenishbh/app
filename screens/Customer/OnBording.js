@@ -38,12 +38,16 @@ const onboarding_screens = [
 ]
 
 
-const OnBording= () =>{
+const OnBording= ({navigation}) =>{
 
     const scrollX = React.useRef (new Animated.Value(0)).current
     const [loading, setLoading] = React.useState(false);
     
-    
+    const handleDone = () => {
+
+            navigation.navigate('Home'); // Navigate to the main app screen after updating the user data
+
+      };
 
     const Dots=()=>{
 
