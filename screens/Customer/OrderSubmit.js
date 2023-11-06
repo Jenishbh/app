@@ -4,7 +4,9 @@ import { PrimaryButton } from '../../components/Button'
 import {db} from '../../database/firebase'
 import { getAuth } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import moment from 'moment';
+import firebase from 'firebase/app';
+import {Timestamp } from 'firebase/firestore';
 
 
 export default OrderSubmit = ({ navigation }) => {
@@ -34,36 +36,117 @@ export default OrderSubmit = ({ navigation }) => {
     fetchCartData();
   }, []);
 
-  const saveReservation = async (withFood = false) => {
+
+  // A function to check for the next available table of a specific type
+  const getNextAvailableTable = async (tableType, reservationTimestamp) => {
+    try {
+      // Get a reference to the collection of tables
+      const tablesRef = db.collection('Tables');
+      
+  
+      // Query for tables of the specific type
+      let querySnapshot;
+      try {
+        const query = tablesRef.where('name', '==', tableType).orderBy('name');
+        querySnapshot = await query.get();
+      } catch (queryError) {
+        
+        throw new Error("Query failed for tables of the specified type.");
+      }
+  
+      
+  
+      if (!querySnapshot.empty) {
+        let availableTableRef = null;
+  
+        for (const doc of querySnapshot.docs) {
+          let tableData;
+          try {
+            tableData = doc.data();
+          } catch (dataError) {
+            console.error("Error getting document data: ", dataError);
+            continue; // Skip to the next document
+          }
+          
+          console.log('Table data:', tableData);
+          console.log('Reservation timestamp:', reservationTimestamp);
+  
+          // Check if the table is available
+          if (tableData.available && (!tableData.reservations || !tableData.reservations.includes(reservationTimestamp))) {
+            availableTableRef = doc.ref;
+            console.log('Found available table:', availableTableRef);
+            break; // Exit the loop once an available table is found
+          }
+        }
+  
+        if (availableTableRef) {
+          try {
+            // Found an available table, so reserve it by adding the reservation timestamp to it
+            await availableTableRef.update({
+              reservations: firebase.firestore.FieldValue.arrayUnion(reservationTimestamp)
+            });
+          } catch (updateError) {
+            console.error("Error updating table reservation: ", updateError);
+            throw new Error("Failed to update table with reservation.");
+          }
+  
+          return availableTableRef;
+        } else {
+          console.log('No documents found');
+          return null; // Indicate no available tables were found
+        }
+      } else {
+        console.log('No tables of the specified type were found.');
+        return null; // Indicate no tables of the specified type were found
+      }
+    } catch (error) {
+      console.error("Error in getNextAvailableTable: ", error);
+      throw error; // Re-throw the error to be handled by the caller
+    }
+  };
+  
+
+  const saveReservation = async (udata, withFood = false) => {
     const auth = getAuth();
     const user = auth.currentUser;
   
     // Assuming `udata` contains `reservationDate` and `reservationTime`
     // which are strings in a format that can be used to construct a Date object.
     // Example: '2023-11-04' and '14:00' (2 PM)
-    const reservationStart = new Date(`${udata.Date}T${udata.Time}`);
-    const reservationEnd = new Date(reservationStart.getTime() + (60 * 60 * 1000)); // Reservation end time (one hour later)
+    console.log(udata)
+    
+      const datePart = moment(udata.Date, 'ddd, M/D/YYYY').format('YYYYMMDD');
+      const timePart = udata.Time.replace(':', '');
+      const formatDateForDocument = `${datePart}_${timePart}`;
+    
   
+    // Function to check the availability of a table and return the tableRef if available
+
+  
+    // Try to find an available table
+    const tableRef = await getNextAvailableTable(udata.Table_Type, formatDateForDocument);
+
+    if (tableRef){
     try {
       // Reference to the specific table document
-      const tableRef = db.collection('Tables').doc(`${udata.tableType}_table_${udata.tableCount}`);
+      const tableRef = db.collection('Tables').doc(`${udata.Table_Type}_${udata.Table_count}`);
       
       // Update the table's document with the current reservation
-      await tableRef.set({
-        currentReservation: {
-          startTime: reservationStart,
-          endTime: reservationEnd,
+      await tableRef.collection('Reservations').doc(formatDateForDocument).set({
+        
+          Date: udata.Date,
+          Time: udata.Time,
           user: user.email,
+          status: "reserved",
           foodDetails: withFood ? cartData : []
-        }
+        
       }, { merge: true });
   
       // Add a reservation record to the user's collection
       await db.collection('UserData').doc(user.email).collection('Reservation').add({
         ...udata,
         tableRef: tableRef.path,
-        startTime: reservationStart,
-        endTime: reservationEnd,
+        Time: udata.Time,
         foodDetails: withFood ? cartData : [],
         status: "reserved"
       });
@@ -73,6 +156,7 @@ export default OrderSubmit = ({ navigation }) => {
     } catch (error) {
       console.error("Error saving reservation:", error);
     }
+  }
   };
   
   
@@ -91,7 +175,7 @@ export default OrderSubmit = ({ navigation }) => {
               [
                 {
                   text: "Confirm",
-                  onPress: () => saveReservation(true)
+                  onPress: () => saveReservation( udata, true)
                 },
                 {
                   text: "Cancel",
@@ -103,7 +187,7 @@ export default OrderSubmit = ({ navigation }) => {
         },
         {
           text: "No, only table",
-          onPress: () => saveReservation(false)
+          onPress: () => saveReservation(udata,false)
         },
         {
           text: "Cancel",

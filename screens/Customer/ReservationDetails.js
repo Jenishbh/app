@@ -15,7 +15,8 @@ const ReservationDetails=({navigation, route})=>{
 
 
         const item = route.params;
-        const [count, setCount] = useState(0);
+        const [minSize, maxSize] = item.size.split('-').map(Number)
+        const [count, setCount] = useState(minSize);
         
         const [username, setUsername] = useState({});
         const [selectedDate, setSelectedDate] = useState('');
@@ -49,17 +50,15 @@ const ReservationDetails=({navigation, route})=>{
 
           function Counter(){
             
-            
               const addCountHandler = () => {
-                if (count === parseInt(item.size))
-                {return;}
+                if (count < maxSize){
                 setCount(count + 1);
+                }
               };
               const removeCountHandler = () => {
-                if(count === 0){
-                  return;  
-                }
+                if(count > minSize){
                 setCount(count - 1);
+                }
               };
             
               return (
@@ -125,10 +124,10 @@ const ReservationDetails=({navigation, route})=>{
                     const reservationData = {
                         Name: username,
                         Date: selectedDate,
-                        
                         Time: selectedTime,
                         Table_Type: item.name,
-                        Number_of_People: count
+                        Number_of_People: count,
+                        Table_count: item.count
                     };
                     
 
