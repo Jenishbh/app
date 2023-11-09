@@ -16,7 +16,8 @@ import Menucard from "../screens/Customer/Menucard";
 import Error from "../screens/Customer/Error";
 //import Reservation from '../screens/Customer/Reservation'
 //import Manager_home from '../screens/Manager/Manager_home';
-//
+import Manager_home from "../screens/Manager/manager_home";
+import QRScannerScreen from "../screens/Manager/QRScannerScreen";
 import DetailsScreen from "../screens/Customer/detailsScreen";
 import OnBording from "../screens/Customer/OnBording";
 //import Signin from '../screens/Welcome/Signin';
@@ -129,7 +130,16 @@ const BottomNavigator = ({ navigation }) => {
 const AuthNavigator = () => (
   <Stack.Navigator>
 
-
+<Stack.Screen
+      name="Manager_home"
+      component={Manager_home}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="QRScannerScreen"
+      component={QRScannerScreen}
+      options={{ headerShown: false }}
+    />
 
     
     <Stack.Screen
@@ -211,10 +221,11 @@ const AuthNavigator = () => (
     />
     <Stack.Screen
       name="RegistrationDetails"
-
       component={RegistrationDetails}
       options={{ headerShown: false }}
     />
+
+
 
   </Stack.Navigator>
 );

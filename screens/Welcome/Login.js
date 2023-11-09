@@ -1,5 +1,5 @@
 import { Text, View, TouchableOpacity, Image, SafeAreaView, Alert } from 'react-native'
-import React,{useState} from 'react'
+import React,{useState, useEffect} from 'react'
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
 
@@ -26,13 +26,32 @@ const Signin = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [imgUrl, setImgUrl] = useState('');
 
-
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const user = auth.currentUser;
+      if (user) {
+        await user.getIdToken(true); // This forces a refresh of the ID token
+      }
+    }, 60 * 60 * 1000); // Refresh every hour, for example
+  
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+  
   const handleLogin = async () => {
-    //Handel Login by firebase
-
     try {
       const userCredentials = await signInWithEmailAndPassword(auth, email, password);
       const authUser = userCredentials.user;
+  
+      // Get the ID token result which contains the custom claims
+      const idTokenResult = await authUser.getIdTokenResult();
+  
+      if (idTokenResult.claims.role === 'manager') {
+        // Redirect to the manager's home screen if the user has a 'manager' role
+        navigation.navigate('Manager_home');
+      } else {
+        // Redirect to the regular user's home screen otherwise
+        navigation.navigate('Home');
+      }
   
       console.log('Logged in with: ', authUser.email);
   
@@ -40,32 +59,31 @@ const Signin = ({ navigation }) => {
       const doc = await db.collection('UserData').doc(authUser.email).get();
   
       if (doc.exists) {
-          const userData = doc.data();
+        const userData = doc.data();
   
-          // Store the necessary details in AsyncStorage
-          await AsyncStorage.setItem('user_data', JSON.stringify({
-              email: userData.email,
-              username: userData.name,
-              phone: userData.phone,
-              imgUrl: userData.imageUrl
-          }));
+        // Store the necessary details in AsyncStorage
+        await AsyncStorage.setItem('user_data', JSON.stringify({
+          email: userData.email,
+          username: userData.name,
+          phone: userData.phone,
+          imgUrl: userData.imageUrl
+        }));
   
-          setUsername(userData.name);
-          setEmail(userData.email);
-          setPhone(userData.phone);
-          setImgUrl(userData.imageUrl);
+        // Update state with user details
+        setUsername(userData.name);
+        setEmail(userData.email);
+        setPhone(userData.phone);
+        setImgUrl(userData.imageUrl);
       } else {
-          console.error("No user details found in Firestore for:", authUser.email);
-          throw new Error("User details not found");
+        console.error("No user details found in Firestore for:", authUser.email);
+        throw new Error("User details not found");
       }
-  
-      navigation.navigate('Home');
-  } catch (error) {
+    } catch (error) {
       console.error("Error during login: ", error);
       alert(error.message);
+    }
   }
-      }
-
+  
   
   const handleEmployeeLogin = () => {
     //Handel Login by firebase

@@ -26,6 +26,7 @@
     "node-mailjet": "^6.0.4",
     "react": "18.2.0",
     "react-native": "0.72.5",
+    "react-native-camera": "^4.2.1",
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.13.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
@@ -40,7 +41,8 @@
     "react-native-view-shot": "^3.7.0",
     "react-native-webview": "^13.6.0",
     "react-navigation": "^5.0.0",
-    "realm": "^12.2.1"
+    "realm": "^12.2.1",
+    "expo-barcode-scanner": "~12.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
