@@ -16,7 +16,7 @@ const Table = [
     },
     {
       id: 2,
-      name: 'Regular_Outdoor_Table',
+      name: 'Regular Outdoor Table',
       size: '1-3',
       count: 3,
       price: '12.30',

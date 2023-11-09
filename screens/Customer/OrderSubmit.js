@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import firebase from 'firebase/app';
-import {Timestamp } from 'firebase/firestore';
+import { arrayUnion } from 'firebase/firestore';
 
 
 export default OrderSubmit = ({ navigation }) => {
@@ -72,10 +72,13 @@ export default OrderSubmit = ({ navigation }) => {
           console.log('Reservation timestamp:', reservationTimestamp);
   
           // Check if the table is available
-          if (tableData.available && (!tableData.reservations || !tableData.reservations.includes(reservationTimestamp))) {
+          if (!tableData.reservations || !tableData.reservations.includes(reservationTimestamp)) {
             availableTableRef = doc.ref;
             console.log('Found available table:', availableTableRef);
             break; // Exit the loop once an available table is found
+          }else {
+            alert('All Tables are curruntly reserve for this timeslots please either select a new time slot or new table')
+            navigation.navigate('Home')//navigate user to reservation details screen
           }
         }
   
@@ -83,7 +86,7 @@ export default OrderSubmit = ({ navigation }) => {
           try {
             // Found an available table, so reserve it by adding the reservation timestamp to it
             await availableTableRef.update({
-              reservations: firebase.firestore.FieldValue.arrayUnion(reservationTimestamp)
+              reservations: arrayUnion(reservationTimestamp)
             });
           } catch (updateError) {
             console.error("Error updating table reservation: ", updateError);
@@ -125,30 +128,31 @@ export default OrderSubmit = ({ navigation }) => {
   
     // Try to find an available table
     const tableRef = await getNextAvailableTable(udata.Table_Type, formatDateForDocument);
-
+    const addReservationToTable = async (tableRef, reservationDetails) => {
+      // Add the reservation to the Reservations sub-collection
+      return tableRef.collection('Reservations').doc(formatDateForDocument).set(reservationDetails);
+    };
     if (tableRef){
+
     try {
+      const reservationDetails = {
+        Date: udata.Date,
+        Time: udata.Time,
+        user: user.email,
+        count: udata.Number_of_People,
+        foodDetails: withFood ? cartData : []
+      };
       // Reference to the specific table document
-      const tableRef = db.collection('Tables').doc(`${udata.Table_Type}_${udata.Table_count}`);
-      
-      // Update the table's document with the current reservation
-      await tableRef.collection('Reservations').doc(formatDateForDocument).set({
-        
-          Date: udata.Date,
-          Time: udata.Time,
-          user: user.email,
-          status: "reserved",
-          foodDetails: withFood ? cartData : []
-        
-      }, { merge: true });
+      await addReservationToTable(tableRef, reservationDetails);
   
       // Add a reservation record to the user's collection
       await db.collection('UserData').doc(user.email).collection('Reservation').add({
         ...udata,
         tableRef: tableRef.path,
         Time: udata.Time,
+        count: udata.Number_of_People,
         foodDetails: withFood ? cartData : [],
-        status: "reserved"
+        
       });
   
       console.log("Reservation saved successfully!");
@@ -301,3 +305,9 @@ const styles = StyleSheet.create({
 },
 
 });
+
+
+
+
+
+
