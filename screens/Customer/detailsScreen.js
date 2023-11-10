@@ -56,29 +56,6 @@ const DetailsScreen = ({navigation, route})=>{
     
     const handlebook = async () => {
 
-       // const dataref = db.collection('Reservation').doc(user.email);
-        
-       // dataref.collection('Food').get().then(DocumentSnapshot => {
-       //     let updated = false;
-        //    DocumentSnapshot.forEach(doc =>{
-        //        if (item.id == doc.data().id) {
-        //            doc.ref.update({qty: doc.data().qty + 1});
-        //            updated = true;
-        //        }
-        //    })
-        //    if (!updated){
-        //        console.log("not update")
-        //        dataref.collection('Food')
-        //        .add({
-        //            id: item.id,
-        //            name: item.name,
-        //            qty: 1,
-        //            salePrice: item.price,
-        //            image: item.image,
-        //            checked: 1
-        //        })
-        //    }
-        //})
         await addToCart(item);
         navigation.navigate('Home');
 

@@ -34,7 +34,8 @@ import ReservationHome from "../screens/Customer/ReservationHome";
 import ReservationDetails from "../screens/Customer/ReservationDetails";
 import RegistrationHistory from "../screens/Customer/RegistrationHistory";
 import RegistrationDetails from "../screens/Customer/RegistrationDetails";
-
+import TableManagementScreen from "../screens/Manager/TableManagementScreen";
+import TableSelectionScreen from "../screens/Manager/TableSelectionScreen";
 //import Dashboard from '../screens/Manager/dash/dashboard';
 import CartScreen from "../screens/Customer/CartScreen";
 import Confirm_res from "../screens/Customer/Confirm_res";
@@ -132,6 +133,7 @@ const AuthNavigator = () => (
 
 
 
+
     
     <Stack.Screen
       name="Signin"
@@ -220,11 +222,23 @@ const AuthNavigator = () => (
       component={Manager_home}
       options={{ headerShown: false }}
     />
+        <Stack.Screen
+      name="TableSelectionScreen"
+      component={TableSelectionScreen}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen
       name="QRScannerScreen"
       component={QRScannerScreen}
       options={{ headerShown: false }}
     />
+    <Stack.Screen
+      name="TableManagementScreen"
+      component={TableManagementScreen}
+      options={{ headerShown: false }}
+    />
+
+
 
 
   </Stack.Navigator>

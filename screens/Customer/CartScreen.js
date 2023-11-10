@@ -68,35 +68,7 @@ export default function CartScreen(props) {
 			centerElement: {justifyContent: 'center', alignItems: 'center'},
 		});
 
-		//const auth = getAuth();
-    	//const user = auth.currentUser;
-		//const dataref = db.collection('Reservation').doc(user.email);
-		
 
-		// Fetch DEtails from firebase
-
-		//db.collection('Reservation').doc(user.email).collection('Food').get().then(DocumentSnapshot => {
-		//	const a=[]
-		//	if (!DocumentSnapshot.empty){DocumentSnapshot.forEach((DocumentSnapshot)=>{  
-			  
-		//	  a.push(DocumentSnapshot.data())
-			  
-		//	});this.setState({cartItems: a})
-		//	}   
-			
-		//  })
-
-
-		  //Submit fod to firebase
-
-		 // const submitfood =()=>{
-		//	const item = [...this.state.cartItems]
-
-		//	db.collection('Reservation').doc(user.email).update({
-		//	  total: item[index]['subtotalPrice']
-		//	})
-		//	navigation.navigate('Customer_home')
-		 // }
 		
 
 
@@ -105,18 +77,9 @@ export default function CartScreen(props) {
 				const newItems = [...cartItems]; // clone the array 
 				newItems[index]['checked'] = value == 1 ? 0 : 1; // set the new value 
 				setCartItems(newItems ); // set new state
-				//dataref.collection('Food').get().then(DocumentSnapshot => {
-					
-				//	DocumentSnapshot.forEach(doc =>{
-				//		if (newItems[index]['id'] == doc.data().id) {
-				//			doc.ref.update({checked: newItems[index]['checked']});
-							
-				//		}
-				//	})})
+
 			}
 			
-
-
 
 			let selectHandlerAll = (value) => {
 				const newItems = [...cartItems]; // clone the array 
@@ -125,14 +88,7 @@ export default function CartScreen(props) {
 				});
 				setCartItems( newItems )
 				setSelectAll(value == true ? false : true); // set new state
-				//dataref.collection('Food').get().then(DocumentSnapshot => {
-					
-					//DocumentSnapshot.forEach(doc =>{
-						
-					//		doc.ref.update({checked: !value});
-							
-						
-					//})})
+
 			}
 
 			
@@ -177,25 +133,10 @@ export default function CartScreen(props) {
 					newItems[index]['qty'] = currentQty + 1;
 					
 				
-					//dataref.collection('Food').get().then(DocumentSnapshot => {
-					
-					//DocumentSnapshot.forEach(doc =>{
-					//	if (newItems[index]['id'] == doc.data().id) {
-					//		doc.ref.update({qty: newItems[index]['qty']});
-							
-					//	}
-					//})})
-			  //db.collection('Reservation').doc(user.email).collection('Food').where(id==index).update({qty: currentQty})
+	
 				} else if(action == 'less'){
 					newItems[index]['qty'] = currentQty > 1 ? currentQty - 1 : 1;
-					//dataref.collection('Food').get().then(DocumentSnapshot => {
-					
-						//DocumentSnapshot.forEach(doc =>{
-							//if (newItems[index]['id'] == doc.data().id) {
-							//	doc.ref.update({qty: newItems[index]['qty']});
-								
-							//}
-					//	})})
+
 					updateCartItem(index, newItems[index]);
 				}
 				

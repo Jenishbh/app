@@ -13,13 +13,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 function Confirm_res ({navigation, route }){
   const item = route.params
+  
   const [udata, setUdata] = useState('');
   const [rdata, setRdata] = useState('');
   const [foodData, setFoodData] = useState([]);
   const auth = getAuth();
   const user = auth.currentUser;
   const safeAreaViewRef = useRef();
-
 
 
 
@@ -30,7 +30,7 @@ function Confirm_res ({navigation, route }){
     let base64Logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAA..';
     return(
       <QRCode 
-           value={JSON.stringify(['item.user'])}
+           value={JSON.stringify([item.user,item.reservationId])}
           
            logoSize={30}
            logoBackgroundColor='transparent'
@@ -41,57 +41,6 @@ function Confirm_res ({navigation, route }){
   
 
 // ...
-
-
-
-
-
-  
-    const Receipt = () => {
-        
-        return <SafeAreaView
-          backgroundColor={'white'}
-          surfaceColor="#F7F7F7"
-          
-          
-          style={{
-            
-            width:300,
-            alignSelf:'center',
-            
-            
-          }}
-        >
-            <View>
-          <View style={{alignSelf:'center', borderRadius:20}}>
-                <Image style={{height:80, width:80}}  source={require('../../assets/third.png')}/>
-                
-          </View>
-          <Text style={{fontSize:15, textAlign:'center',color:'gray',}}>EMAIL</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449',paddingTop:5}}>user</Text>
-          </View>
-
-          <View style={{marginVertical:0}}>
-          <Text style={{fontSize:15, textAlign:'center',color:'gray',marginVertical:20}}>Table</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449'}}>Table</Text>
-          <Text style={{fontSize:15, textAlign:'center',color:'gray',marginVertical:20}}>People</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449'}}> count</Text>
-          <Text style={{fontSize:15, textAlign:'center',color:'gray',marginVertical:20}}>Date</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449', paddingBottom:5}}>Date: Date</Text>
-          </View>
-          <View style={{borderBottomColor:'lightgray',borderBottomWidth:0.5,width:250,alignSelf:'center'}}></View>
-
-          <View style={{marginVertical:10}}>
-
-          <Text style={{fontSize:30, textAlign:'center',color:'#67C8D5'}}>Scan QR Code</Text>
-          <Text style={{fontSize:15, textAlign:'center',color:'#414449', paddingHorizontal:13, paddingTop:10}}>Is available, the waiter can easilt check the user in</Text>
-          <View style={{alignSelf:'center',paddingTop:10}} >
-            <CreateQR/>
-           </View>
-          </View>
-        </SafeAreaView>
-      }
-
 
 
 const saveScreenshot = async () => {
@@ -122,23 +71,7 @@ const saveScreenshot = async () => {
   
   navigation.navigate('Home')
 };
-const ReservationDetailsCard = () => {
-  return (
-    <View style={styles.reservationCard}>
-      <View style={styles.reservationDetails}>
-        <Text style={styles.reservationInfo}>Guests: {rdata.Number_of_People}</Text>
-        <Text style={styles.reservationInfo}>Date: {rdata.Date}</Text>
-        <Text style={styles.reservationInfo}>Time: {rdata.Time}</Text>
-        
-      </View>
-      <Image
-        source={require('../../assets/third.png')} // Your logo image path
-        style={styles.logo}
-        resizeMode="contain"
-      />
-    </View>
-  );
-};
+
 
 return (
   <ScrollView style={styles.scrollView}>
@@ -162,7 +95,7 @@ return (
       <View style={styles.reservationDetails}>
   <View style={styles.detailItem}>
     <Text style={styles.detailLabel}>Table</Text>
-    <Text style={styles.detailValue}>{item.Table_Type}</Text>
+    <Text style={styles.detailValue}>{item.Table}</Text>
   </View>
   <View style={styles.detailItem}>
     <Text style={styles.detailLabel}>Guests</Text>

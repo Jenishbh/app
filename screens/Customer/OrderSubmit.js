@@ -135,19 +135,12 @@ export default OrderSubmit = ({ navigation }) => {
     if (tableRef){
 
     try {
-      const reservationDetails = {
-        Date: udata.Date,
-        Time: udata.Time,
-        user: user.email,
-        count: udata.Number_of_People,
-        Table: udata.Table_Type,
-        foodDetails: withFood ? cartData : []
-      };
+      
       // Reference to the specific table document
-      await addReservationToTable(tableRef, reservationDetails);
+      
   
       // Add a reservation record to the user's collection
-      await db.collection('UserData').doc(user.email).collection('Reservation').add({
+      const reservationRef = await db.collection('UserData').doc(user.email).collection('Reservation').add({
         ...udata,
         tableRef: tableRef.path,
         Time: udata.Time,
@@ -155,7 +148,19 @@ export default OrderSubmit = ({ navigation }) => {
         foodDetails: withFood ? cartData : [],
         
       });
-  
+
+      await reservationRef
+      const reservationDetails = {
+        Date: udata.Date,
+        Time: udata.Time,
+        user: user.email,
+        count: udata.Number_of_People,
+        Table: udata.Table_Type,
+        reservationId: reservationRef.id,
+        foodDetails: withFood ? cartData : []
+      };
+      await addReservationToTable(tableRef, reservationDetails);
+      await AsyncStorage.removeItem('@reservation');
       console.log("Reservation saved successfully!");
       navigation.replace('Confirm_res', reservationDetails);
     } catch (error) {
