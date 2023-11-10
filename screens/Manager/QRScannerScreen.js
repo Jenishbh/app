@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import { db } from '../../database/firebase';
 
 const QRScannerScreen = ({ navigation }) => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -13,11 +14,30 @@ const QRScannerScreen = ({ navigation }) => {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
-    // You can handle any actions you need to perform upon scanning the QR code here
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-  };
+    
+    try {
+        const qrData = JSON.parse(data);
+        const email = qrData[0]; // Accessing the first element of the array
+        const id = qrData[1]; // Accessing the second element of the array
+        console.log(email, id);
+
+        const rDoc = await db.collection('UserData').doc(email).collection('Reservation').doc(id).get();
+
+        if (rDoc.exists) {
+          console.log(rDoc.data())
+          navigation.navigate('TableManagementScreen', rDoc.data());
+        } else {
+            alert('No Reservation Found');
+        }
+    } catch (error) {
+        console.error("Error in QR code scanning or database operation: ", error);
+        alert('Error processing QR code');
+    }
+};
+
+
 
   if (hasPermission === null) {
     return <Text>Requesting for camera permission</Text>;
