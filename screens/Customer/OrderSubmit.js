@@ -140,6 +140,7 @@ export default OrderSubmit = ({ navigation }) => {
         Time: udata.Time,
         user: user.email,
         count: udata.Number_of_People,
+        Table: udata.Table_Type,
         foodDetails: withFood ? cartData : []
       };
       // Reference to the specific table document
@@ -156,7 +157,7 @@ export default OrderSubmit = ({ navigation }) => {
       });
   
       console.log("Reservation saved successfully!");
-      navigation.replace('Confirm_res');
+      navigation.replace('Confirm_res', reservationDetails);
     } catch (error) {
       console.error("Error saving reservation:", error);
     }

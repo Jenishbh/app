@@ -1,4 +1,4 @@
-import { Dimensions, SafeAreaView, Text, View, } from 'react-native'
+import { Dimensions, SafeAreaView, Text, View, Image, ScrollView,StyleSheet, TouchableOpacity} from 'react-native'
 import React, { useState,useEffect,useRef } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 //import ZigzagView from "react-native-zigzag-view"
@@ -8,12 +8,11 @@ import {db} from '../../database/firebase'
 import { getAuth } from "firebase/auth";
 import { captureRef   } from "react-native-view-shot";
 import * as MediaLibrary from 'expo-media-library';
- // if you want to save the image to the device's gallery
+import { LinearGradient } from 'expo-linear-gradient';
 
 
-
-function Confirm_res ({navigation}){
-
+function Confirm_res ({navigation, route }){
+  const item = route.params
   const [udata, setUdata] = useState('');
   const [rdata, setRdata] = useState('');
   const [foodData, setFoodData] = useState([]);
@@ -21,58 +20,9 @@ function Confirm_res ({navigation}){
   const user = auth.currentUser;
   const safeAreaViewRef = useRef();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // Fetch UserData
-      try {
-        const userDoc = await db.collection('UserData').doc(user.email).get();
-        if (userDoc.exists) setUdata(userDoc.data());
-      } catch (error) {
-        console.error("Error fetching UserData:", error);
-      }
-
-      // Fetch Reservation
-      try {
-        const reservationDoc = await db.collection('Reservation').doc(user.email).get();
-        if (reservationDoc.exists) setRdata(reservationDoc.data());
-      } catch (error) {
-        console.error("Error fetching Reservation:", error);
-      }
-
-      // Fetch Food Data
-      try {
-        const foodCollection = await db.collection('Reservation').doc(user.email).collection('Food').get();
-        if (!foodCollection.empty) {
-          const foods = foodCollection.docs.map(doc => doc.data());
-          setFoodData(foods);
-        } else {
-          setFoodData([]);
-        }
-      } catch (error) {
-        console.error("Error fetching Food Data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
 
-  const name ={
-      Email: user.email+" ", 
-      Name: udata.name+"  ",
-      }
-  const table ={
-    Table: rdata.Table_Type+" ",
-      People: rdata.Number_of_People,
-      
-  }
-  
-  
- const food ={
-  food: foodData
- }
- 
-console.log(food)
+
  
 
   
@@ -80,7 +30,7 @@ console.log(food)
     let base64Logo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAA..';
     return(
       <QRCode 
-           value={JSON.stringify([name, table, food.food])}
+           value={JSON.stringify(['item.user'])}
           
            logoSize={30}
            logoBackgroundColor='transparent'
@@ -102,40 +52,36 @@ console.log(food)
         return <SafeAreaView
           backgroundColor={'white'}
           surfaceColor="#F7F7F7"
-          top={false}
+          
           
           style={{
-            marginTop:15 ,
+            
             width:300,
             alignSelf:'center',
             
             
           }}
         >
-            <View style={{marginVertical:20}}>
-          <View style={{borderRadius:40, backgroundColor:'lightgray', height:70,width:70, justifyContent:'center',alignSelf:'center'}}>
-                <Text style={{fontSize:20, textAlign:'center',color:'white'}}>JP</Text>
+            <View>
+          <View style={{alignSelf:'center', borderRadius:20}}>
+                <Image style={{height:80, width:80}}  source={require('../../assets/third.png')}/>
                 
           </View>
-          <Text style={{fontSize:15, textAlign:'center',color:'gray',paddingTop:5}}>NAME</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449',paddingTop:5}}>{udata.name}</Text>
+          <Text style={{fontSize:15, textAlign:'center',color:'gray',}}>EMAIL</Text>
+          <Text style={{fontSize:18, textAlign:'center',color:'#414449',paddingTop:5}}>user</Text>
           </View>
 
-          <View style={{marginVertical:20}}>
-
-          <Text style={{fontSize:15, textAlign:'center',color:'gray'}}>PHONE NUMBER</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449',paddingTop:5}}>{udata.phone}</Text>
-
-          </View>
-          <View style={{marginVertical:20}}>
-
-          <Text style={{fontSize:15, textAlign:'center',color:'gray'}}>EMAIL</Text>
-          <Text style={{fontSize:18, textAlign:'center',color:'#414449',paddingTop:5}}>{user.email}</Text>
-
+          <View style={{marginVertical:0}}>
+          <Text style={{fontSize:15, textAlign:'center',color:'gray',marginVertical:20}}>Table</Text>
+          <Text style={{fontSize:18, textAlign:'center',color:'#414449'}}>Table</Text>
+          <Text style={{fontSize:15, textAlign:'center',color:'gray',marginVertical:20}}>People</Text>
+          <Text style={{fontSize:18, textAlign:'center',color:'#414449'}}> count</Text>
+          <Text style={{fontSize:15, textAlign:'center',color:'gray',marginVertical:20}}>Date</Text>
+          <Text style={{fontSize:18, textAlign:'center',color:'#414449', paddingBottom:5}}>Date: Date</Text>
           </View>
           <View style={{borderBottomColor:'lightgray',borderBottomWidth:0.5,width:250,alignSelf:'center'}}></View>
 
-          <View style={{marginVertical:20}}>
+          <View style={{marginVertical:10}}>
 
           <Text style={{fontSize:30, textAlign:'center',color:'#67C8D5'}}>Scan QR Code</Text>
           <Text style={{fontSize:15, textAlign:'center',color:'#414449', paddingHorizontal:13, paddingTop:10}}>Is available, the waiter can easilt check the user in</Text>
@@ -176,53 +122,172 @@ const saveScreenshot = async () => {
   
   navigation.navigate('Home')
 };
-
-
-    return(
-      
+const ReservationDetailsCard = () => {
+  return (
+    <View style={styles.reservationCard}>
+      <View style={styles.reservationDetails}>
+        <Text style={styles.reservationInfo}>Guests: {rdata.Number_of_People}</Text>
+        <Text style={styles.reservationInfo}>Date: {rdata.Date}</Text>
+        <Text style={styles.reservationInfo}>Time: {rdata.Time}</Text>
         
-        <SafeAreaView ref={safeAreaViewRef} style={{backgroundColor:'white', flex:1}}>
-          
-            {/* {Header} */}
-           
-            <View style={{ 
-                paddingVertical:10,
-                marginHorizontal:20,
-                alignContent: 'space-between',
-                flexDirection: 'row',
-                }}>
-                
-               
-                <Icon name ='arrow-back-ios' size={28} onPress={navigation.goBack}/>
-            
-                
-            </View>
-            <Text style={{fontSize: 20,alignSelf:'center' }} onPress={navigation.goBack}>Receipt</Text>
-            <Receipt />
-            
-            <View style={{marginTop:20}}>
-                
-                <PrimaryButton
-                    title={'Order Now'}
-                    btnContainer={{
-                        backgroundColor:'#67C8D5',
-                        height:60,
-                        width:300,
-                        borderRadius:60,
-                        alignSelf:'center'
-                    }}onPress={saveScreenshot} />
-                
-                
-            </View>
-            <View >
-                
-                
-            </View>
-        </SafeAreaView>
-        
-    )
+      </View>
+      <Image
+        source={require('../../assets/third.png')} // Your logo image path
+        style={styles.logo}
+        resizeMode="contain"
+      />
+    </View>
+  );
+};
 
-}
+return (
+  <ScrollView style={styles.scrollView}>
+    <LinearGradient
+      colors={['#e9ecef', '#adb5bd']} // Adjust these colors to your preference
+      style={styles.gradientBackground}
+    >
+      <View style={styles.header}>
+        <Icon name='arrow-back-ios' size={28} color="#FFF" onPress={navigation.goBack} />
+      </View>
+
+      <Image
+        source={require('../../assets/third.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+
+      <Text style={styles.title}>Thanks for your reservation!</Text>
+      <Text style={styles.subtitle}>Please Save this QR code with you</Text>
+
+      <View style={styles.reservationDetails}>
+  <View style={styles.detailItem}>
+    <Text style={styles.detailLabel}>Table</Text>
+    <Text style={styles.detailValue}>{item.Table_Type}</Text>
+  </View>
+  <View style={styles.detailItem}>
+    <Text style={styles.detailLabel}>Guests</Text>
+    <Text style={styles.detailValue}>{item.count}</Text>
+  </View>
+  <View style={styles.detailItem}>
+    <Text style={styles.detailLabel}>Date</Text>
+    <Text style={styles.detailValue}>{item.Date}</Text>
+  </View>
+  <View style={styles.detailItem}>
+    <Text style={styles.detailLabel}>Time</Text>
+    <Text style={styles.detailValue}>{item.Time}</Text>
+  </View>
+</View>
+
+      <View style={styles.qrCodeContainer}>
+        <CreateQR />
+      </View>
+
+      <TouchableOpacity style={styles.confirmButton} onPress={saveScreenshot}>
+        <Text style={styles.confirmButtonText}>Confirm Reservation</Text>
+      </TouchableOpacity>
+    </LinearGradient>
+  </ScrollView>
+);
+};
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  gradientBackground: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 60, // Adjust this value as needed
+  },
+  header: {
+    width: '100%',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  title: {
+    color: '#FFF',
+    fontSize: 38,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: -140,
+  },
+  subtitle: {
+    color: '#FFF',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+   
+  },
+  reservationDetails: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white for a grayish effect
+    borderRadius: 15,
+    padding: 20,
+    width: '80%', // Adjust width as needed
+    marginTop: 20,
+    marginBottom: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap', // Allows items to wrap to the next line
+    justifyContent: 'space-between',
+    paddingBottom:-20
+  },
+  detailItem: {
+    // Half the width of the parent minus padding
+    width: '48%', // Slightly less than half to account for justifyContent space-between
+    marginBottom: 20, // Spacing between rows
+    
+    
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: '#FFF',
+    marginBottom: 15,
+    textAlign:'center',
+    
+  },
+  detailValue: {
+    fontSize: 16,
+    color: '#FFF',
+    fontWeight: 'bold',
+    textAlign:'center'
+  },
+  reservationInfo: {
+    fontSize: 16,
+    color: '#FFF',
+    marginVertical: 5,
+    alignSelf: 'flex-start',
+  },
+  qrCodeContainer: {
+    borderWidth: 1,
+    borderColor: '#FFF',
+    padding: 10,
+    borderRadius: 15,
+    backgroundColor: 'white', // White background to contrast with QR code
+    marginBottom: 30,
+  },
+  confirmButton: {
+    backgroundColor: '#FF1493', // Deep pink
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    width: '80%', // Adjust width as needed
+    alignItems: 'center',
+    marginBottom: 50, // Added space at the bottom
+  },
+  confirmButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+  },
+  logo: {
+    width: 280, // Adjust as needed
+    height: 280,
+    top:-80  // Adjust as needed
+     // Space from the top of the screen
+  },
+});
+
 
 
 export default Confirm_res; 
