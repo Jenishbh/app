@@ -1,22 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ScrollView, Image, SafeAreaView } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ScrollView, Image, SafeAreaView, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialIcons'
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { db } from '../../database/firebase';
+
 const screenWidth = Dimensions.get('window').width;
 
 const ReservationDetailsScreen = ({ navigation, route }) => {
-    const  reservationId  = route.params;
-    
+  const reservation = route.params; // Consider renaming for clarity
+  console.log(reservation);
 
+  const handleKeepCurrentTable = async () => {
+      const tableDocId = reservation.tableRef.split('/')[1]; // Extract the table document ID from the tableRef path
 
+      // Reference to the table's reservation subcollection document
+      const tableReservationRef = db.collection('Tables').doc(tableDocId).collection('Reservations').doc(reservation.reservationId);
+      
+      try {
+          // Update the reservation status in the table's subcollection
+          await tableReservationRef.update({
+              status: 'confirmed',
+          });
 
-    const handleKeepCurrentTable = () => {
-        // Logic for keeping the current table
-    };
+          // Store the food details in AsyncStorage
+          await AsyncStorage.setItem('@FoodStorage', JSON.stringify(reservation.foodDetails));
+          // Store the user details in AsyncStorage
+          await AsyncStorage.setItem('@UserStorage', JSON.stringify({
+              name: reservation.Name,
+              tableType: reservation.Table_Type,
+              tableId: reservation.tableID
+          }));
+
+          console.log('Table has been confirmed. Food details and user details stored in AsyncStorage.');
+          navigation.navigate('FoodSelectionScreen', reservation); // Pass the entire reservation object
+
+      } catch (error) {
+          console.error('Error confirming table: ', error);
+          Alert.alert('Error', 'Failed to confirm table.');
+      }
+  };
 
     const handleSelectNewTable = () => {
         // Navigate to table selection screen
-        navigation.navigate('TableSelectionScreen');
+        navigation.navigate('FoodSelectionScreen', reservation);
     };
 
     return (
@@ -41,19 +68,19 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
             <View style={styles.reservationDetails}>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Table</Text>
-          <Text style={styles.detailValue}>{reservationId.Table_Type}</Text>
+          <Text style={styles.detailValue}>{reservation.Table_Type}</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Guests</Text>
-          <Text style={styles.detailValue}>{reservationId.count}</Text>
+          <Text style={styles.detailValue}>{reservation.count}</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Date</Text>
-          <Text style={styles.detailValue}>{reservationId.Date}</Text>
+          <Text style={styles.detailValue}>{reservation.Date}</Text>
         </View>
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Time</Text>
-          <Text style={styles.detailValue}>{reservationId.Time}</Text>
+          <Text style={styles.detailValue}>{reservation.Time}</Text>
         </View>
       </View>
 

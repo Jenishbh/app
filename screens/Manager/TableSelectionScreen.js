@@ -1,28 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions } from 'react-native';
-
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, SectionList } from 'react-native';
+import { db } from '../../database/firebase';
 const screenWidth = Dimensions.get('window').width;
 const numColumns = 2; // You can adjust this based on your layout preference
 const tileSize = screenWidth / numColumns - 20; // Adjust tile size based on screen width and desired margin
 
 const TableSelectionScreen = ({ navigation, route }) => {
     // ... existing logic ...
-
+    const curruntTable = route.params
+   
     // ... existing renderItem function ...
-    const [tables, setTables] = useState([]);
+    const [tableGroups, setTableGroups] = useState([]);
     const [selectedTable, setSelectedTable] = useState(null);
 
     useEffect(() => {
-        // Fetch tables data and set it
-        // This is dummy data, replace it with actual data fetching
-        const fetchedTables = [
-            { id: 1, status: 'available' },
-            { id: 2, status: 'occupied' },
-            { id: 3, status: 'available' },
-            // ... more tables ...
-        ];
-        setTables(fetchedTables);
-    }, []);
+        const unsubscribe = db.collection('Tables')
+          .onSnapshot((snapshot) => {
+            const tables = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+    
+            // Group tables by the 'name' field
+            const groups = tables.reduce((acc, table) => {
+              const { name } = table;
+              if (!acc[name]) {
+                acc[name] = [];
+              }
+              acc[name].push(table);
+              return acc;
+            }, {});
+    
+            // Convert groups object into an array suitable for SectionList
+            const groupArray = Object.keys(groups).map(name => ({
+              title: name,
+              data: groups[name],
+            }));
+    
+            setTableGroups(groupArray);
+          });
+    
+        // Detach listener when the component is unmounted
+        return () => unsubscribe();
+      }, []);
+    
+        // Detach listener when the component is unmounted
+  
+    
 
     const handleTableSelect = (table) => {
         if (table.status === 'available') {
@@ -36,31 +60,41 @@ const TableSelectionScreen = ({ navigation, route }) => {
         // Navigate back or update state as needed
     };
 
-    const renderItem = ({ item }) => (
+    const renderSectionHeader = ({ section: { title } }) => (
+        <Text style={styles.header}>{title}</Text>
+      );
+    
+      const renderItem = ({ item }) => (
+        
         <TouchableOpacity
-            style={[
-                styles.table,
-                item.status !== 'available' && styles.tableOccupied,
-                item.id === selectedTable && styles.tableSelected,
-            ]}
-            onPress={() => handleTableSelect(item)}
-            disabled={item.status !== 'available'}
+          style={[styles.table, item.size,  item.id === curruntTable.tableID && styles.currentlyBooked,]} 
+          
+          // Use the 'size' field to determine the style if necessary
+          onPress={() => selectTable(item)}
+          disabled={item.id === curruntTable.tableID}
         >
-            <Text style={styles.tableText}>Table {item.id}</Text>
+            <Text style={styles.tableText}>{item.name}</Text>
+            <Text style={styles.tableText}>Size: {item.size}</Text>
         </TouchableOpacity>
-    );
+      );
+    
+      const selectTable = (tableId) => {
+        // Logic to handle table selection
+        console.log(`Table ${tableId} selected`);
+        // Perform actions such as updating the reservation with the selected table
+      };
 
 
     return (
+        
         <View style={styles.container}>
             <Text style={styles.title}>Select a Table</Text>
-            <FlatList
-                data={tables}
-                renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
-                numColumns={numColumns}
-                contentContainerStyle={styles.listContent}
-            />
+            <SectionList
+        sections={tableGroups}
+        renderSectionHeader={renderSectionHeader}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+      />
             <TouchableOpacity
                 style={[styles.confirmButton, !selectedTable && styles.buttonDisabled]}
                 onPress={confirmTableSelection}
@@ -69,6 +103,7 @@ const TableSelectionScreen = ({ navigation, route }) => {
                 <Text style={styles.confirmButtonText}>Confirm Table</Text>
             </TouchableOpacity>
         </View>
+        
     );
 };
 
@@ -77,7 +112,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop: 20,
+        paddingTop: 60,
+        paddingBottom: 40,
         backgroundColor: '#f0f0f0',
     },
     title: {
@@ -88,6 +124,9 @@ const styles = StyleSheet.create({
     listContent: {
         alignItems: 'center',
     },
+    currentlyBooked: {
+        backgroundColor: 'red', // Highlight the currently booked table with red color
+      },
     table: {
         backgroundColor: '#4CAF50',
         alignItems: 'center',
@@ -112,7 +151,7 @@ const styles = StyleSheet.create({
     },
     tableText: {
         color: '#FFF',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
     },
     confirmButton: {
