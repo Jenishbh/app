@@ -36,6 +36,10 @@ import RegistrationHistory from "../screens/Customer/RegistrationHistory";
 import RegistrationDetails from "../screens/Customer/RegistrationDetails";
 import TableManagementScreen from "../screens/Manager/TableManagementScreen";
 import TableSelectionScreen from "../screens/Manager/TableSelectionScreen";
+import FoodSelectionScreen from "../screens/Manager/FoodSelectionScreen";
+import ManagerMenu from "../screens/Manager/ManagerMenu";
+import ManagerCart from "../screens/Manager/ManagerCart";
+import CheckoutScreen from "../screens/Manager/Checkout";
 //import Dashboard from '../screens/Manager/dash/dashboard';
 import CartScreen from "../screens/Customer/CartScreen";
 import Confirm_res from "../screens/Customer/Confirm_res";
@@ -133,7 +137,6 @@ const AuthNavigator = () => (
 
 
 
-
     
     <Stack.Screen
       name="Signin"
@@ -227,17 +230,37 @@ const AuthNavigator = () => (
       component={TableSelectionScreen}
       options={{ headerShown: false }}
     />
+
+    <Stack.Screen
+      name="TableManagementScreen"
+      component={TableManagementScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ManagerMenu"
+      component={ManagerMenu}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ManagerCart"
+      component={ManagerCart}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="CheckoutScreen"
+      component={CheckoutScreen}
+      options={{ headerShown: false }}
+    />
     <Stack.Screen
       name="QRScannerScreen"
       component={QRScannerScreen}
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="TableManagementScreen"
-      component={TableManagementScreen}
+      name="FoodSelectionScreen"
+      component={FoodSelectionScreen}
       options={{ headerShown: false }}
     />
-
 
 
 
