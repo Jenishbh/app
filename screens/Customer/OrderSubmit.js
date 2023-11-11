@@ -73,7 +73,10 @@ export default OrderSubmit = ({ navigation }) => {
   
           // Check if the table is available
           if (!tableData.reservations || !tableData.reservations.includes(reservationTimestamp)) {
-            availableTableRef = doc.ref;
+            availableTableRef = {
+              ref:doc.ref,
+              TableID: tableData.id,
+            }
             console.log('Found available table:', availableTableRef);
             break; // Exit the loop once an available table is found
           }else {
@@ -81,11 +84,11 @@ export default OrderSubmit = ({ navigation }) => {
             navigation.navigate('Home')//navigate user to reservation details screen
           }
         }
-  
+        
         if (availableTableRef) {
           try {
             // Found an available table, so reserve it by adding the reservation timestamp to it
-            await availableTableRef.update({
+            await availableTableRef.ref.update({
               reservations: arrayUnion(reservationTimestamp)
             });
           } catch (updateError) {
@@ -127,13 +130,11 @@ export default OrderSubmit = ({ navigation }) => {
 
   
     // Try to find an available table
-    const tableRef = await getNextAvailableTable(udata.Table_Type, formatDateForDocument);
-    const addReservationToTable = async (tableRef, reservationDetails) => {
-      // Add the reservation to the Reservations sub-collection
-      return tableRef.collection('Reservations').doc(formatDateForDocument).set(reservationDetails);
-    };
-    if (tableRef){
-
+    const tableData = await getNextAvailableTable(udata.Table_Type, formatDateForDocument);
+    
+    if (tableData){
+      const TableInternalID = tableData.TableID
+      const tableRef = tableData.ref
     try {
       
       // Reference to the specific table document
@@ -145,11 +146,15 @@ export default OrderSubmit = ({ navigation }) => {
         tableRef: tableRef.path,
         Time: udata.Time,
         count: udata.Number_of_People,
+        tableID: TableInternalID,
         foodDetails: withFood ? cartData : [],
         
       });
 
-      await reservationRef
+      await reservationRef.update({
+        reservationId: reservationRef.id,
+      })
+
       const reservationDetails = {
         Date: udata.Date,
         Time: udata.Time,
@@ -159,7 +164,8 @@ export default OrderSubmit = ({ navigation }) => {
         reservationId: reservationRef.id,
         foodDetails: withFood ? cartData : []
       };
-      await addReservationToTable(tableRef, reservationDetails);
+
+      await tableRef.collection('Reservations').doc(reservationRef.id).set(reservationDetails);
       await AsyncStorage.removeItem('@reservation');
       console.log("Reservation saved successfully!");
       navigation.replace('Confirm_res', reservationDetails);
