@@ -74,7 +74,7 @@ const saveScreenshot = async () => {
 
 
 return (
-  <ScrollView style={styles.scrollView}>
+  <ScrollView style={styles.scrollView} ref={safeAreaViewRef}>
     <LinearGradient
       colors={['#e9ecef', '#adb5bd']} // Adjust these colors to your preference
       style={styles.gradientBackground}
