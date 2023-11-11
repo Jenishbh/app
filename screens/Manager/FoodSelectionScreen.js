@@ -53,7 +53,8 @@ const Checkout = ({ navigation, route }) => {
   // Function to handle the checkout process
   const handleCheckout = () => {
     // Handle the checkout process
-    // Placeholder function, implement as needed
+    // Placeholder function, implement as needed\
+    navigation.navigate('CheckoutScreen');
   };
 
 
