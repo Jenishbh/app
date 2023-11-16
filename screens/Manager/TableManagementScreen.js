@@ -9,13 +9,13 @@ const screenWidth = Dimensions.get('window').width;
 
 const ReservationDetailsScreen = ({ navigation, route }) => {
   const reservation = route.params; // Consider renaming for clarity
-  console.log(reservation);
+  
 
   const handleKeepCurrentTable = async () => {
-      const tableDocId = reservation.tableRef.split('/')[1]; // Extract the table document ID from the tableRef path
+       // Extract the table document ID from the tableRef path
 
       // Reference to the table's reservation subcollection document
-      const tableReservationRef = db.collection('Tables').doc(tableDocId).collection('Reservations').doc(reservation.reservationId);
+      const tableReservationRef = db.collection('Tables').doc(reservation.tableRef);
       
       try {
           // Update the reservation status in the table's subcollection
@@ -28,10 +28,15 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
           // Store the user details in AsyncStorage
           await AsyncStorage.setItem('@UserStorage', JSON.stringify({
               name: reservation.Name,
-              tableType: reservation.Table_Type,
-              tableId: reservation.tableID
+              Table_Type: reservation.Table_Type,
+              tableID: reservation.tableID,
+              reservationId: reservation.reservationId,
+              email: reservation.email,
+              tableRef: reservation.tableRef,
+              Date: reservation.Date,
+              Time: reservation.Time,
           }));
-
+          
           console.log('Table has been confirmed. Food details and user details stored in AsyncStorage.');
           navigation.navigate('FoodSelectionScreen', reservation); // Pass the entire reservation object
 
@@ -43,7 +48,7 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
 
     const handleSelectNewTable = () => {
         // Navigate to table selection screen
-        navigation.navigate('FoodSelectionScreen', reservation);
+        navigation.navigate('TableSelectionScreen', reservation);
     };
 
     return (

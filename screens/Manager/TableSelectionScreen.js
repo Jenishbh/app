@@ -1,176 +1,178 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, SectionList } from 'react-native';
-import { db } from '../../database/firebase';
-const screenWidth = Dimensions.get('window').width;
-const numColumns = 2; // You can adjust this based on your layout preference
-const tileSize = screenWidth / numColumns - 20; // Adjust tile size based on screen width and desired margin
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
+import { db } from '../../database/firebase'; // Adjust this import based on your Firebase configuration
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TableSelectionScreen = ({ navigation, route }) => {
-    // ... existing logic ...
-    const curruntTable = route.params
-   
-    // ... existing renderItem function ...
-    const [tableGroups, setTableGroups] = useState([]);
-    const [selectedTable, setSelectedTable] = useState(null);
+const TableManagementScreen = () => {
+  const [tables, setTables] = useState([]);
+  const [id, setid]= useState([])
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [currentUserReservation, setCurrentUserReservation] = useState(null);
 
-    useEffect(() => {
-        const unsubscribe = db.collection('Tables')
-          .onSnapshot((snapshot) => {
-            const tables = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
-    
-            // Group tables by the 'name' field
-            const groups = tables.reduce((acc, table) => {
-              const { name } = table;
-              if (!acc[name]) {
-                acc[name] = [];
-              }
-              acc[name].push(table);
-              return acc;
-            }, {});
-    
-            // Convert groups object into an array suitable for SectionList
-            const groupArray = Object.keys(groups).map(name => ({
-              title: name,
-              data: groups[name],
-            }));
-    
-            setTableGroups(groupArray);
-          });
-    
-        // Detach listener when the component is unmounted
-        return () => unsubscribe();
-      }, []);
-    
-        // Detach listener when the component is unmounted
+  useEffect(() => {
+    fetchCurrentUserReservation();
+    const unsubscribe = db.collection('Tables')
+      .onSnapshot(snapshot => {
+        const fetchedTables = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setTables(fetchedTables);
+      });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchCurrentUserReservation = async () => {
+    try {
+      const reservationData = await AsyncStorage.getItem('@UserStorage');
+      if (reservationData !== null) {
+        setCurrentUserReservation(JSON.parse(reservationData));
+      }
+    } catch (e) {
+      Alert.alert("Error", "Failed to fetch current reservation data.");
+    }
+  };
+
+  const handleTableSelect = (table) => {
+    setSelectedTable(table);
+  };
+
+  const confirmTableSelection = async () => {
+    if (selectedTable && currentUserReservation) {
+      try {
+        // Step 1: Remove reservation data from old table
+        await db.collection('Tables').doc(currentUserReservation.tableRef)
+          .collection('Reservation').doc(currentUserReservation.reservationId)
+          .delete();
   
-    
+        // Step 2: Add reservation data to new table
+        await db.collection('Tables').doc(selectedTable.ref)
+          .collection('Reservation').doc(currentUserReservation.reservationId)
+          .set({
+            ...currentUserReservation
+          });
+          await db.collection('Tables').doc(selectedTable.ref).update({
+            status: 'Occupied'
+          });
+        // Step 3: Update user's reservation data
+        const newReservationData = {
+          tableID: selectedTable.id,
+          tableRef: selectedTable.ref,
+          tableType: selectedTable.name // or whatever field represents the table type
+        };
+  
+        await db.collection('UserData').doc(currentUserReservation.email)
+          .collection('Reservation').doc(currentUserReservation.reservationId)
+          .update(newReservationData);
+  
+        // Confirmation message
+        Alert.alert("Reservation Updated", `Your reservation has been moved to table ${selectedTable.name}`);
+      } catch (error) {
+        console.error("Error updating reservation: ", error);
+        Alert.alert("Error", "Failed to update reservation.");
+      }
+    }
+  };
+  
 
-    const handleTableSelect = (table) => {
-        if (table.status === 'available') {
-            setSelectedTable(table.id);
-        }
-    };
-
-    const confirmTableSelection = () => {
-        // Logic to confirm table selection
-        alert(`Table ${selectedTable} selected`);
-        // Navigate back or update state as needed
-    };
-
-    const renderSectionHeader = ({ section: { title } }) => (
-        <Text style={styles.header}>{title}</Text>
-      );
-    
-      const renderItem = ({ item }) => (
-        
-        <TouchableOpacity
-          style={[styles.table, item.size,  item.id === curruntTable.tableID && styles.currentlyBooked,]} 
-          
-          // Use the 'size' field to determine the style if necessary
-          onPress={() => selectTable(item)}
-          disabled={item.id === curruntTable.tableID}
-        >
-            <Text style={styles.tableText}>{item.name}</Text>
-            <Text style={styles.tableText}>Size: {item.size}</Text>
-        </TouchableOpacity>
-      );
-    
-      const selectTable = (tableId) => {
-        // Logic to handle table selection
-        console.log(`Table ${tableId} selected`);
-        // Perform actions such as updating the reservation with the selected table
-      };
-
-
+  const renderTableItem = ({ item }) => {
+    const isOccupied = item.status === 'Occupied';
+    const isCurrentUserTable = currentUserReservation?.tableId === item.id;
     return (
-        
-        <View style={styles.container}>
-            <Text style={styles.title}>Select a Table</Text>
-            <SectionList
-        sections={tableGroups}
-        renderSectionHeader={renderSectionHeader}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
-            <TouchableOpacity
-                style={[styles.confirmButton, !selectedTable && styles.buttonDisabled]}
-                onPress={confirmTableSelection}
-                disabled={!selectedTable}
-            >
-                <Text style={styles.confirmButtonText}>Confirm Table</Text>
-            </TouchableOpacity>
-        </View>
-        
+      <TouchableOpacity 
+        style={[
+          styles.table, 
+          isCurrentUserTable && styles.tableHeldByUser,
+          isOccupied && styles.tableOccupied 
+        ]} 
+        onPress={() => isOccupied ? null : handleTableSelect(item)}
+        disabled={isOccupied}
+      >
+        <Text style={styles.tableText}>Table {item.name}</Text>
+        <Text style={styles.tableText}>Status: {item.status}</Text>
+      </TouchableOpacity>
     );
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Select a Table</Text>
+      <FlatList
+        data={tables}
+        renderItem={renderTableItem}
+        keyExtractor={(item) => item.id}
+        numColumns={2} // Adjust as needed for your layout
+      />
+      <TouchableOpacity
+        style={[styles.confirmButton, !selectedTable && styles.buttonDisabled]}
+        onPress={confirmTableSelection}
+        disabled={!selectedTable}
+      >
+        <Text style={styles.confirmButtonText}>Confirm Table</Text>
+      </TouchableOpacity>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        paddingTop: 60,
-        paddingBottom: 40,
-        backgroundColor: '#f0f0f0',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    listContent: {
-        alignItems: 'center',
-    },
-    currentlyBooked: {
-        backgroundColor: 'red', // Highlight the currently booked table with red color
-      },
-    table: {
-        backgroundColor: '#4CAF50',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: tileSize,
-        width: tileSize,
-        margin: 10,
-        borderRadius: 10,
-        elevation: 2, // Shadow for Android
-        shadowColor: '#000', // Shadow for iOS
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        shadowOffset: { width: 0, height: 2 },
-    },
-    tableOccupied: {
-        backgroundColor: '#F44336',
-        opacity: 0.6, // Slightly transparent to indicate unavailability
-    },
-    tableSelected: {
-        borderWidth: 3,
-        borderColor: '#FFEB3B', // Highlight color for selection
-    },
-    tableText: {
-        color: '#FFF',
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    confirmButton: {
-        backgroundColor: '#4a90e2',
-        borderRadius: 20,
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        width: '80%',
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    buttonDisabled: {
-        backgroundColor: '#ccc',
-    },
-    confirmButtonText: {
-        color: '#FFF',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 60,
+    paddingBottom: 40,
+    backgroundColor: '#f0f0f0',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  table: {
+    backgroundColor: '#4CAF50',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 100,
+    width: '45%', // Adjust as needed
+    margin: 10,
+    borderRadius: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  tableSelected: {
+    borderColor: '#FFEB3B',
+    borderWidth: 3,
+  },
+  tableText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  confirmButton: {
+    backgroundColor: '#4a90e2',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    width: '80%',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  confirmButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  tableHeldByUser: {
+    backgroundColor: '#808080', // Gray color for the table held by the current user
+  },
+  tableOccupied: {
+    backgroundColor: '#F44336', // Red color for occupied tables
+    opacity: 0.6,
+  },
 });
 
-export default TableSelectionScreen;
+export default TableManagementScreen;
