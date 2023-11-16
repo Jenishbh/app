@@ -8,58 +8,46 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const CheckoutScreen = ({ navigation, route }) => {
   const [foodItems, setFoodItems] = useState([]);
-  const [splitReceipt, setSplitReceipt] = useState(false);
+  const [udata, setudata] = useState([])
   const [selectedTipPercentage, setSelectedTipPercentage] = useState(null);
   const [customTip, setCustomTip] = useState('');
-  const item = route.params
+
 
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchDataAndStore();
-      return () => {};
-    }, [])
-  );
-
-  const fetchDataAndStore = async () => {
-    try {
+      const fetchDataAndStore = async () => {
+        try {
       const storedCartItems = await AsyncStorage.getItem('@FoodStorage');
+      const data = await AsyncStorage.getItem('@UserStorage') 
+      setudata(JSON.parse(data))
+      
       if (storedCartItems !== null) {
         setFoodItems(JSON.parse(storedCartItems));
+        console.log(foodItems)
       } else {
-        const fetchedData = await fetchDataFromDatabase();
-        if (fetchedData && fetchedData.length > 0) {
-          await AsyncStorage.setItem('@FoodStorage', JSON.stringify(fetchedData));
-          setFoodItems(fetchedData);
-        } else {
           setFoodItems([]); // Handle case where fetched data is empty
         }
       }
-    } catch (error) {
+     catch (error) {
       console.error('Failed to fetch or store data', error);
       Alert.alert('Error', 'Failed to load data');
     }
   };
+  fetchDataAndStore();
+},[])
+)
+  
 
-  const fetchDataFromDatabase = async () => {
-    // Replace this with your actual data fetching logic
-    const data ={
-      id: item.food.id
-    }
-  };
   // Calculate the total
-  const subtotal = foodItems.reduce((acc, item) => item.checked ? acc + parseFloat(item.salePrice) : acc, 0);
+  const subtotal = foodItems.reduce((acc, item) => item.checked ? acc + parseFloat(item.totalPrice) : acc, 0);
   const tipAmount = selectedTipPercentage ? subtotal * (selectedTipPercentage / 100) : parseFloat(customTip) || 0;
   const total = subtotal + tipAmount;
-  // Function to handle checking/unchecking items
-  const toggleCheckItem = (itemId) => {
-    setFoodItems(foodItems.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item));
-  };
+
 
   // Function to handle the checkout process
   const handleCheckout = () => {
-    // Handle the checkout process
-    // Placeholder function, implement as needed
+      navigation.navigate('BufferScreen')
   };
 
 
@@ -80,9 +68,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     setSelectedTipPercentage(null); // Reset tip percentage when custom is entered
   };
 
-  const handleAddFoodItem = () => {
-    navigation.navigate('ManagerMenu');
-  };
+
 
 
   return (
@@ -90,35 +76,31 @@ const CheckoutScreen = ({ navigation, route }) => {
       {/* QR Code Section */}
       <View style={styles.qrContainer}>
         <Image style={styles.qrCode} source={require('../../assets/third.png')} />
-        <Text style={styles.qrText}>Jenish Patel</Text>
+        <Text style={styles.qrText}>{udata.name}</Text>
       </View>
 
       {/* Split Receipt Toggle */}
       <View style={styles.splitReceiptContainer}>
         <Text style={styles.splitReceiptText}>Table: </Text>
-        <Switch
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={splitReceipt ? "#f5dd4b" : "#f4f3f4"}
-          onValueChange={() => setSplitReceipt(previousState => !previousState)}
-          value={splitReceipt}
-        />
+        <Text style={styles.splitReceiptText}>{udata.Table_Type}({udata.tableID}) </Text>
+      </View>
+      <View style={styles.splitReceiptContainer}>
+        <Text style={styles.splitReceiptText}>Date: </Text>
+        <Text style={styles.splitReceiptText}>{udata.Table_Type}({udata.tableID}) </Text>
       </View>
       <View style={styles.card}>
       {/* Food Items List */}
       {foodItems.map(item => (
-        <TouchableOpacity key={item.id} style={styles.foodItem} onPress={() => toggleCheckItem(item.id)}>
-          <Icon name={item.checked ? 'check-circle' : 'circle-thin'} size={24} color="#000" />
+        <View key={item.id} style={styles.foodItem}>
           <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemPrice}>{item.salePrice}</Text>
-          <TouchableOpacity onPress={() => handleDeleteItem(item.id)}>
-        <Icona name="delete" size={24} color="#000" />
-      </TouchableOpacity>
-        </TouchableOpacity>
+        <View style={styles.qtyContainer}>
+            <Text style={styles.qtyText}>{item.qty}</Text>
+        </View>
+          <Text style={styles.itemPrice}>{item.totalPrice}</Text>
+        </View>
+        
       ))}
-      <TouchableOpacity style={styles.addItemRow} onPress={handleAddFoodItem}>
-          <Icon name="plus" size={20} color="#000" />
-          <Text style={styles.addFoodText}>Add Food Item</Text>
-        </TouchableOpacity>
+
 
     {/* Add Tips Section */}
     <View style={styles.tipsContainer}>
@@ -148,18 +130,18 @@ const CheckoutScreen = ({ navigation, route }) => {
       <View style={styles.separator} />
       <View style={styles.subtotalRow}>
         <Text style={styles.totalText}>Subtotal</Text>
-        <Text style={styles.totalText}>{subtotal.toFixed(2)} SAR</Text>
+        <Text style={styles.totalText}>{subtotal.toFixed(2)} $</Text>
       </View>
     </View>
 
     {/* Tip and Total Section */}
     <View style={styles.subtotalRow}>
       <Text style={styles.totalText}>Tip: </Text>
-      <Text style={styles.totalText}>{tipAmount.toFixed(2)} SAR</Text>
+      <Text style={styles.totalText}>{tipAmount.toFixed(2)} $</Text>
     </View>
     <View style={styles.subtotalRow}>
       <Text style={styles.totalText}>Total: </Text>
-      <Text style={styles.totalText}>{total.toFixed(2)} SAR</Text>
+      <Text style={styles.totalText}>{total.toFixed(2)} $</Text>
     </View>
     </View>
       {/* Checkout Button */}
@@ -216,18 +198,23 @@ const styles = StyleSheet.create({
   foodItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    position: 'relative',
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderColor: '#EAEAEA',
   },
   itemName: {
-    flex: 1,
+    flex: 1, // Take up as much space as possible
     fontSize: 16,
-    marginLeft: 10,
+    textAlign: 'left',
+    
   },
   itemPrice: {
+    flex: 1, // Take up as much space as possible
     fontSize: 16,
+    textAlign: 'right',
+    
   },
   totalContainer: {
     paddingVertical: 20,
@@ -303,6 +290,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  qtyContainer: {
+    position: 'absolute', // Position absolutely to keep it centered
+    left: '50%', // Start at the halfway point of the container
+    top: '50%', // Start at the halfway vertical point too
+    transform: [{ translateX: 40 }, { translateY: 10 }], // Adjust the position to center the element
+    width: 40, // Fixed width for the quantity container
+    height: 20, // Fixed height for the quantity container
+    justifyContent: 'center',
+    alignItems: 'center', // Fixed width for the qty container
+  },
+  qtyText:{
+    fontSize:16,
+  }
 });
 
 export default CheckoutScreen;

@@ -40,6 +40,7 @@ import FoodSelectionScreen from "../screens/Manager/FoodSelectionScreen";
 import ManagerMenu from "../screens/Manager/ManagerMenu";
 import ManagerCart from "../screens/Manager/ManagerCart";
 import CheckoutScreen from "../screens/Manager/Checkout";
+import BufferScreen from "../screens/Manager/Buffer";
 //import Dashboard from '../screens/Manager/dash/dashboard';
 import CartScreen from "../screens/Customer/CartScreen";
 import Confirm_res from "../screens/Customer/Confirm_res";
@@ -259,6 +260,11 @@ const AuthNavigator = () => (
     <Stack.Screen
       name="FoodSelectionScreen"
       component={FoodSelectionScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="BufferScreen"
+      component={BufferScreen}
       options={{ headerShown: false }}
     />
 
