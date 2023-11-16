@@ -135,6 +135,8 @@ export default OrderSubmit = ({ navigation }) => {
     if (tableData){
       const TableInternalID = tableData.TableID
       const tableRef = tableData.ref
+      const tableRefPath = tableRef.path;
+      const tableRefID = tableRefPath.split('/')[1];
     try {
       
       // Reference to the specific table document
@@ -143,10 +145,11 @@ export default OrderSubmit = ({ navigation }) => {
       // Add a reservation record to the user's collection
       const reservationRef = await db.collection('UserData').doc(user.email).collection('Reservation').add({
         ...udata,
-        tableRef: tableRef.path,
+        tableRef: tableRefID,
         Time: udata.Time,
         count: udata.Number_of_People,
         tableID: TableInternalID,
+        email:user.email,
         foodDetails: withFood ? cartData : [],
         
       });
@@ -165,8 +168,10 @@ export default OrderSubmit = ({ navigation }) => {
         foodDetails: withFood ? cartData : []
       };
 
-      await tableRef.collection('Reservations').doc(reservationRef.id).set(reservationDetails);
+      await tableRef.collection('Reservation').doc(reservationRef.id).set(reservationDetails);
+      await tableRef.update({status: 'reserved'})
       await AsyncStorage.removeItem('@reservation');
+      await AsyncStorage.removeItem('@cartItems');
       console.log("Reservation saved successfully!");
       navigation.replace('Confirm_res', reservationDetails);
     } catch (error) {

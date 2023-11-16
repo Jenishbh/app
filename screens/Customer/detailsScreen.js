@@ -40,8 +40,7 @@ const DetailsScreen = ({navigation, route})=>{
                     name: itemToAdd.name,
                     qty: 1,
                     salePrice: itemToAdd.price,
-                    image: itemToAdd.image,
-                    checked: 1
+                    
                 };
                 cartItems.push(newItem);
             }
