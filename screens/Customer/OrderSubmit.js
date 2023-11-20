@@ -1,4 +1,4 @@
-import { Alert, Image, SafeAreaView, StyleSheet, Text, View} from 'react-native'
+import { Alert, Image, SafeAreaView, StyleSheet, Text, View, ActivityIndicator } from 'react-native'
 import React, { useState,useEffect } from 'react'
 import { PrimaryButton } from '../../components/Button'
 import {db} from '../../database/firebase'
@@ -12,7 +12,7 @@ import { arrayUnion } from 'firebase/firestore';
 export default OrderSubmit = ({ navigation }) => {
   const [udata, setUdata] = useState({});
   const [cartData, setCartData] = useState([]);
-
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const fetchReservationDetails = async () => {
       try {
@@ -115,11 +115,12 @@ export default OrderSubmit = ({ navigation }) => {
   const saveReservation = async (udata, withFood = false) => {
     const auth = getAuth();
     const user = auth.currentUser;
+    setIsLoading(true);
   
     // Assuming `udata` contains `reservationDate` and `reservationTime`
     // which are strings in a format that can be used to construct a Date object.
     // Example: '2023-11-04' and '14:00' (2 PM)
-    console.log(udata)
+    
     
       const datePart = moment(udata.Date, 'ddd, M/D/YYYY').format('YYYYMMDD');
       const timePart = udata.Time.replace(':', '');
@@ -128,7 +129,7 @@ export default OrderSubmit = ({ navigation }) => {
   
     // Function to check the availability of a table and return the tableRef if available
 
-  
+    
     // Try to find an available table
     const tableData = await getNextAvailableTable(udata.Table_Type, formatDateForDocument);
     
@@ -172,12 +173,15 @@ export default OrderSubmit = ({ navigation }) => {
       await tableRef.update({status: 'reserved'})
       await AsyncStorage.removeItem('@reservation');
       await AsyncStorage.removeItem('@cartItems');
-      console.log("Reservation saved successfully!");
+      setIsLoading(false);
       navigation.replace('Confirm_res', reservationDetails);
     } catch (error) {
       console.error("Error saving reservation:", error);
+      setIsLoading(false);
     }
+  
   }
+  
   };
   
   
@@ -220,9 +224,22 @@ export default OrderSubmit = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <LottieView
+            source={require('../../assets/loading.gif')} // Replace with your Lottie file path
+            autoPlay
+            loop
+            style={styles.lottie}
+          />
+      </View>
+      )}
+       <View style={!isLoading ? styles.content : styles.contentBlur}>
+        
+      
         <View>
-            <Image source={require('../../assets/table_res.gif')} style={styles.gifImage} />
-            <Text style={styles.headerText}>Your Table has been Reserved</Text>
+            <Image source={require('../../assets/waiter.png')} style={styles.gifImage} />
+            <Text style={styles.headerText}>Please Verify Your Details</Text>
         </View>
 
         {renderInfo('date', 'Date', udata.Date)}
@@ -244,6 +261,7 @@ export default OrderSubmit = ({ navigation }) => {
             }}
           onPress={handleCheckout}
         />
+      </View>
       </View>
     </SafeAreaView>
   );
@@ -319,6 +337,30 @@ const styles = StyleSheet.create({
   checkoutButton: {
     marginBottom: 20,
     alignItems: 'center',
+},
+loadingOverlay: {
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.8)', // Adjust for desired opacity
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1000,
+},
+lottie: {
+  width: 150, // Adjust as needed
+  height: 150, // Adjust as needed
+},  
+content: {
+  width: '100%',
+  alignItems: 'center',
+},
+contentBlur: {
+  width: '100%',
+  alignItems: 'center',
+  opacity: 0.5, // Adjust for desired blur effect
 },
 
 });
