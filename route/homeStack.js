@@ -136,11 +136,13 @@ const BottomNavigator = ({ navigation }) => {
 const AuthNavigator = () => (
   <Stack.Navigator>
 
+
 <Stack.Screen
-      name="TableSelectionScreen"
-      component={TableSelectionScreen}
+      name="Manager_home"
+      component={Manager_home}
       options={{ headerShown: false }}
     />
+
 
     
     <Stack.Screen
@@ -225,11 +227,7 @@ const AuthNavigator = () => (
       component={RegistrationDetails}
       options={{ headerShown: false }}
     />
-    <Stack.Screen
-      name="Manager_home"
-      component={Manager_home}
-      options={{ headerShown: false }}
-    />
+
 
 
     <Stack.Screen
@@ -267,7 +265,11 @@ const AuthNavigator = () => (
       component={BufferScreen}
       options={{ headerShown: false }}
     />
-
+    <Stack.Screen
+      name="TableSelectionScreen"
+      component={TableSelectionScreen}
+      options={{ headerShown: false }}
+    />
 
 
   </Stack.Navigator>

@@ -87,17 +87,21 @@ const TableManagementScreen = () => {
           });
         // Step 3: Update user's reservation data
         const newReservationData = {
+          ...currentUserReservation,
           tableID: selectedTable.id,
           tableRef: selectedTable.ref,
           tableType: selectedTable.name // or whatever field represents the table type
         };
-  
+         
+        
         await db.collection('UserData').doc(currentUserReservation.email)
           .collection('Reservation').doc(currentUserReservation.reservationId)
           .update(newReservationData);
-  
+        // Step 4: Update user's reservation data in AsyncStorage
+        await AsyncStorage.setItem('@UserStorage', JSON.stringify(newReservationData));
         // Confirmation message
         Alert.alert("Reservation Updated", `Your reservation has been moved to table ${selectedTable.name}`);
+        navigation.navigate('FoodSelectionScreen');
       } catch (error) {
         console.error("Error updating reservation: ", error);
         Alert.alert("Error", "Failed to update reservation.");
@@ -200,7 +204,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   selectedTable: {
-    borderColor: '#4CAF50', // Or any highlight color you prefer
+    borderColor: 'blue', // Or any highlight color you prefer
     borderWidth: 3,        // Adjust the width as needed
     borderRadius: 10,      // Should match your existing `table` style
     // You can add other styles to indicate selection
