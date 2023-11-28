@@ -7,6 +7,25 @@ const TableDetailsScreen = ({ navigation, route}) => {
 
   const routa = route.params
   const item = routa.reserved[0]
+  const [countdowns, setCountdowns] = useState({});
+
+  useEffect(() => {
+    // Update countdown every second
+    const interval = setInterval(() => {
+      const newCountdowns = {};
+
+      foodDetails.forEach(item => {
+        newCountdowns[item.id] = calculateRemainingTime(item.orderTime, item.duration);
+      });
+
+      setCountdowns(newCountdowns);
+    }, 1000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(interval);
+  }, [foodDetails]);
+
+  
   const foodDetails = item.foodDetails.map(food => {
     return{
       name: food.name,
@@ -66,7 +85,7 @@ const TableDetailsScreen = ({ navigation, route}) => {
   
     const minutesLeft = Math.floor(timeLeft / 60000);
     const secondsLeft = Math.floor((timeLeft % 60000) / 1000);
-  
+    
     return `${minutesLeft}m ${secondsLeft}s`;
   };
 
@@ -76,7 +95,7 @@ const TableDetailsScreen = ({ navigation, route}) => {
   const renderFoodItem = (item) => {
     const pan = new Animated.ValueXY();
     const panResponder = createPanResponder(item.id).panHandlers;
-    const remainingTime = calculateRemainingTime(item.orderTime, item.duration);
+    const remainingTime = countdowns[item.id];
     let backgroundColor;
 
     // Color coding based on the remaining time
