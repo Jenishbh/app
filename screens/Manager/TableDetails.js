@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Animated, PanResponder, } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icona from 'react-native-vector-icons/MaterialIcons';
@@ -9,23 +9,6 @@ const TableDetailsScreen = ({ navigation, route}) => {
   const item = routa.reserved[0]
   const [countdowns, setCountdowns] = useState({});
 
-  useEffect(() => {
-    // Update countdown every second
-    const interval = setInterval(() => {
-      const newCountdowns = {};
-
-      foodDetails.forEach(item => {
-        newCountdowns[item.id] = calculateRemainingTime(item.orderTime, item.duration);
-      });
-
-      setCountdowns(newCountdowns);
-    }, 1000);
-
-    // Clear interval on component unmount
-    return () => clearInterval(interval);
-  }, [foodDetails]);
-
-  
   const foodDetails = item.foodDetails.map(food => {
     return{
       name: food.name,
@@ -37,7 +20,32 @@ const TableDetailsScreen = ({ navigation, route}) => {
 
     }
   })
-  console.log(foodDetails)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newCountdowns = {};
+  
+      foodDetails.forEach(item => {
+        if (item.orderTime && item.duration) {
+          
+          newCountdowns[item.id] = calculateRemainingTime(item.orderTime, item.duration);
+        } else {
+          console.log('Missing data for item:', item);
+          newCountdowns[item.id] = 'Data missing';
+        }
+      });
+  
+      setCountdowns(newCountdowns);
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  }, [foodDetails]);
+  
+  
+  
+  
+
+  
 
   const createPanResponder = (itemId) => {
     const pan = new Animated.ValueXY();
@@ -60,34 +68,45 @@ const TableDetailsScreen = ({ navigation, route}) => {
   };
   
   const calculateRemainingTime = (orderTime, duration) => {
-    // Convert order time from HH:MM:SS format to Date object
+    const orderTimea = orderTime || []
+    if (!orderTimea || !duration || typeof orderTimea !== 'string' || typeof duration !== 'string') {
+      console.warn('Invalid input for calculateRemainingTime:', { orderTimea, duration });
+      return 'Invalid data';
+    }
     
-    const orderTimeComponents = orderTime.split(":");
-    const orderHour = parseInt(orderTimeComponents[0]);
-    const orderMinute = parseInt(orderTimeComponents[1]);
-    const orderSecond = parseInt(orderTimeComponents[2]);
+    const orderTimeParts = orderTimea.split(":");
+    if (orderTimeParts.length !== 3) {
+      console.warn('Invalid orderTime format:', orderTimea);
+      return 'Invalid orderTime';
+    }
   
-    const orderDateTime = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), orderHour, orderMinute, orderSecond);
+    const orderHour = parseInt(orderTimeParts[0]);
+    const orderMinute = parseInt(orderTimeParts[1]);
+    const orderSecond = parseInt(orderTimeParts[2]);
   
-    // Convert duration from string format to minutes
+    const now = new Date();
+    const orderDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), orderHour, orderMinute, orderSecond);
+  
     const durationInMinutes = parseInt(duration.split(" ")[0]);
+    if (isNaN(durationInMinutes)) {
+      console.warn('Invalid duration format:', duration);
+      return 'Invalid duration';
+    }
   
-    // Calculate time left
-    const durationInMilliseconds = durationInMinutes * 60 * 1000; // Convert duration from minutes to milliseconds
+    const durationInMilliseconds = durationInMinutes * 60 * 1000;
     const endTime = new Date(orderDateTime.getTime() + durationInMilliseconds);
-    const currentTime = new Date();
-    const timeLeft = endTime.getTime() - currentTime.getTime();
+    const timeLeft = endTime.getTime() - now.getTime();
   
-    // Convert time left in milliseconds to a readable format
     if (timeLeft <= 0) {
       return 'Overdue';
     }
   
     const minutesLeft = Math.floor(timeLeft / 60000);
     const secondsLeft = Math.floor((timeLeft % 60000) / 1000);
-    
+  
     return `${minutesLeft}m ${secondsLeft}s`;
   };
+  
 
   const handleaddfood =()=>{
     navigation.navigate('Menucard')
@@ -95,13 +114,14 @@ const TableDetailsScreen = ({ navigation, route}) => {
   const renderFoodItem = (item) => {
     const pan = new Animated.ValueXY();
     const panResponder = createPanResponder(item.id).panHandlers;
-    const remainingTime = countdowns[item.id];
+    const remainingTime = countdowns[item.id] || 'Calculating...';
+    
     let backgroundColor;
 
     // Color coding based on the remaining time
     if (remainingTime === 'Overdue') {
       backgroundColor = '#ff4d4d'; // Red for overdue
-    } else if (parseInt(remainingTime.split('m')[0]) < 10) {
+    } else if (remainingTime !== 'Calculating...' && parseInt(remainingTime.split('m')[0]) < 10) {
       backgroundColor = '#ffcc00'; // Yellow for less than 10 minutes
     } else {
       backgroundColor = 'lightgreen'; // Green otherwise
@@ -126,13 +146,13 @@ const TableDetailsScreen = ({ navigation, route}) => {
       {/* QR Code Section */}
       <View style={styles.qrContainer}>
         <Image style={styles.qrCode} source={require('../../assets/third.png')} />
-        <Text style={styles.logotxt}>ORDER</Text>
+        <Text style={styles.logotxt}>{item.Table}</Text>
       </View>
 
       {/* Table Details */}
       <View style={styles.tableDetailsContainer}>
-        <Text style={styles.qrText}>Name: {item.user}</Text>
-        <Text style={styles.qrText}>Table: {item.Table} ({item.tableID})</Text>
+        <Text style={styles.qrText}>Email: {item.user}</Text>
+        
       </View>
 
       {/* Food Items List */}
@@ -162,11 +182,11 @@ const styles = StyleSheet.create({
   qrContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 60,
   },
   qrCode: {
-    width: 100,
-    height: 100,
+    width: 180,
+    height: 180,
     marginBottom: 10,
   },
   logotxt: {
