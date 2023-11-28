@@ -50,7 +50,7 @@ const foods = [
     ingredients: 'Chicken,Lemon,Garlic,Spices',
     price: '8.30',
     person: 2,
-    duration: '1 Hour 10 Minutes',
+    duration: '1.10 Hour',
     categoryid: 1,
     image: require('../../assets/food/butter-chicken-curry.jpg'),
     details: 'Chicken is marinated in yogurt, spices, garlic and ginger, then later cooked in a tandoor, but it can also be pan fried, grilled or oven roasted. After that it is tossed with the simmered, richly seasoned tomato sauce.',
@@ -117,7 +117,7 @@ const foods = [
     ingredients: "Rice, Vegetables, Spices, Potatoes, Onion, Oil",
     price: "11.99",
     person: 3,
-    duration: '1 Hour 30 Minutes',
+    duration: '1.30 Hour',
     categoryid: 1,
     image: require('../../assets/food/Vegetable-Biryani.jpg'),
     details: "A delicious and flavorful rice dish made with vegetables, spices, and herbs."

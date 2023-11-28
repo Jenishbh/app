@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import firebase from 'firebase/app';
 import { arrayUnion } from 'firebase/firestore';
-
+import LottieView from 'lottie-react-native';
 
 export default OrderSubmit = ({ navigation }) => {
   const [udata, setUdata] = useState({});

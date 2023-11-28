@@ -1,10 +1,78 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Animated, PanResponder, } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icona from 'react-native-vector-icons/MaterialIcons';
 
-const TableDetailsScreen = ({ udata, foodItems, handleAddComplimentaryItem, handleCheckout }) => {
+const TableDetailsScreen = ({ navigation, route}) => {
 
+  const routa = route.params
+  const item = routa.reserved[0]
+  const foodDetails = item.foodDetails.map(food => {
+    return{
+      name: food.name,
+      price: food.salePrice,
+      qty: food.qty,
+      id: food.id,
+      duration: food.duration,
+      orderTime: item.orderTime
+
+    }
+  })
+  console.log(foodDetails)
+
+  const createPanResponder = (itemId) => {
+    const pan = new Animated.ValueXY();
+  
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        pan.setOffset({ x: pan.x._value, y: 0 });
+        pan.setValue({ x: 0, y: 0 }); // Initial value
+      },
+      onPanResponderMove: Animated.event([
+        null, { dx: pan.x, dy: 0 }
+      ], { useNativeDriver: false }), // Only horizontal movement
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+        // You can add logic here to handle the end of the swipe
+        // For example, if the item is swiped a certain distance, perform an action
+      },
+    });
+  };
+  
+  const calculateRemainingTime = (orderTime, duration) => {
+    // Convert order time from HH:MM:SS format to Date object
+    
+    const orderTimeComponents = orderTime.split(":");
+    const orderHour = parseInt(orderTimeComponents[0]);
+    const orderMinute = parseInt(orderTimeComponents[1]);
+    const orderSecond = parseInt(orderTimeComponents[2]);
+  
+    const orderDateTime = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), orderHour, orderMinute, orderSecond);
+  
+    // Convert duration from string format to minutes
+    const durationInMinutes = parseInt(duration.split(" ")[0]);
+  
+    // Calculate time left
+    const durationInMilliseconds = durationInMinutes * 60 * 1000; // Convert duration from minutes to milliseconds
+    const endTime = new Date(orderDateTime.getTime() + durationInMilliseconds);
+    const currentTime = new Date();
+    const timeLeft = endTime.getTime() - currentTime.getTime();
+  
+    // Convert time left in milliseconds to a readable format
+    if (timeLeft <= 0) {
+      return 'Overdue';
+    }
+  
+    const minutesLeft = Math.floor(timeLeft / 60000);
+    const secondsLeft = Math.floor((timeLeft % 60000) / 1000);
+  
+    return `${minutesLeft}m ${secondsLeft}s`;
+  };
+
+  const handleaddfood =()=>{
+    navigation.navigate('Menucard')
+  }
   const renderFoodItem = (item) => {
     const pan = new Animated.ValueXY();
     const panResponder = createPanResponder(item.id).panHandlers;
@@ -17,14 +85,12 @@ const TableDetailsScreen = ({ udata, foodItems, handleAddComplimentaryItem, hand
     } else if (parseInt(remainingTime.split('m')[0]) < 10) {
       backgroundColor = '#ffcc00'; // Yellow for less than 10 minutes
     } else {
-      backgroundColor = '#33cc33'; // Green otherwise
+      backgroundColor = 'lightgreen'; // Green otherwise
     }
 
     return (
       <View key={item.id} style={[styles.foodItem, { backgroundColor }]}>
-        <TouchableOpacity onPress={() => toggleCheckItem(item.id)}>
-          <Icon name={item.checked ? 'check-circle' : 'circle-thin'} size={24} color="#000" />
-        </TouchableOpacity>
+        
         <Text style={styles.itemName}>{item.name}</Text>
         <Animated.View {...panResponder} style={[styles.swipeable, { transform: [{ translateY: pan.y }] }]}>
           <Text style={styles.qtyText}>{remainingTime}</Text>
@@ -46,22 +112,24 @@ const TableDetailsScreen = ({ udata, foodItems, handleAddComplimentaryItem, hand
 
       {/* Table Details */}
       <View style={styles.tableDetailsContainer}>
-        <Text style={styles.qrText}>Name: {item.name}</Text>
-        <Text style={styles.qrText}>Table: {item.Table_Type} ({item.tableID})</Text>
+        <Text style={styles.qrText}>Name: {item.user}</Text>
+        <Text style={styles.qrText}>Table: {item.Table} ({item.tableID})</Text>
       </View>
 
       {/* Food Items List */}
-      {foodItems.map(renderFoodItem)}
+      {foodDetails.map(renderFoodItem)}
 
       {/* Add Complimentary Item Button */}
-      <TouchableOpacity style={styles.addItemRow} onPress={handleAddComplimentaryItem}>
+      <TouchableOpacity style={styles.addItemRow} onPress={handleaddfood} >
+        
         <Icon name="plus" size={20} color="#000" />
         <Text style={styles.addFoodText}>Add Complimentary Item</Text>
       </TouchableOpacity>
 
       {/* Checkout Button */}
-      <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
+      <TouchableOpacity style={styles.checkoutButton} >
         <Text style={styles.checkoutButtonText}>Confirm Order</Text>
+        
       </TouchableOpacity>
     </ScrollView>
   );

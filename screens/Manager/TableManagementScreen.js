@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect,useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ScrollView, Image, SafeAreaView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,18 +9,39 @@ const screenWidth = Dimensions.get('window').width;
 
 const ReservationDetailsScreen = ({ navigation, route }) => {
   const reservation = route.params; // Consider renaming for clarity
-  
+  const [currentTime, setCurrentTime] = useState('');
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 1000);
 
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  const getCurrentTime = () => {
+    const currentDate = new
+   
+  Date();
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+  
+    
+  const seconds = currentDate.getSeconds();
+  
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
+    return formattedTime;
+  };
   const handleKeepCurrentTable = async () => {
        // Extract the table document ID from the tableRef path
 
       // Reference to the table's reservation subcollection document
-      const tableReservationRef = db.collection('Tables').doc(reservation.tableRef);
+      const tableReservationRef = db.collection('Tables').doc(reservation.tableRef).collection('Reservation').doc(reservation.reservationId);
       
       try {
           // Update the reservation status in the table's subcollection
           await tableReservationRef.update({
               status: 'confirmed',
+              orderTime: currentTime
           });
 
           // Store the food details in AsyncStorage

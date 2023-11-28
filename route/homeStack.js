@@ -138,21 +138,7 @@ const BottomNavigator = ({ navigation }) => {
 const AuthNavigator = () => (
   <Stack.Navigator>
 
-<Stack.Screen
-      name="LiveTable"
-      component={LiveTable}
-      options={{ headerShown: false }}
-    />
-    <Stack.Screen
-      name="TableDetailsScreen"
-      component={TableDetailsScreen}
-      options={{ headerShown: false }}
-    />
-<Stack.Screen
-      name="Manager_home"
-      component={Manager_home}
-      options={{ headerShown: false }}
-    />
+
 
 
     
@@ -281,7 +267,21 @@ const AuthNavigator = () => (
       component={TableSelectionScreen}
       options={{ headerShown: false }}
     />
-
+<Stack.Screen
+      name="LiveTable"
+      component={LiveTable}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="TableDetailsScreen"
+      component={TableDetailsScreen}
+      options={{ headerShown: false }}
+    />
+<Stack.Screen
+      name="Manager_home"
+      component={Manager_home}
+      options={{ headerShown: false }}
+    />
 
   </Stack.Navigator>
 );

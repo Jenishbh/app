@@ -41,7 +41,8 @@ const ManagerCart = ({navigation, route})=>{
                     qty: 1,
                     salePrice: itemToAdd.price,
                     image: itemToAdd.image,
-                    checked: 1
+                    checked: 1,
+                    duration: itemToAdd.duration,
                 };
                 cartItems.push(newItem);
             }

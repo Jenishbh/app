@@ -96,7 +96,7 @@ export default function Manager_home({ navigation }) {
             left: 40,
             borderRadius: 20,
           }}
-          //onPress={() => navigation.navigate("Man_Dash")}
+          onPress={() => navigation.navigate("LiveTable")}
         />
       </View>
     </SafeAreaView>

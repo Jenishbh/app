@@ -54,11 +54,13 @@ const ManagerScreen = ({navigation}) => {
   
 
   const renderTableItem = ({ item }) => {
-    const isReserved = item.status === 'reserved';
+    const isoccupied = item.Reservation.map(rese => rese.status === 'confirmed').some(value => value === true);
+    const reserved = item.Reservation.filter(res => res.status === 'confirmed' )
+    console.log(reserved)
     return (
       <TouchableOpacity
-        style={[styles.tableCard, isReserved ? styles.reserved : styles.available]}
-        onPress={() => navigation.navigate('TableDetailsScreen', { table: item })}
+        style={[styles.tableCard, isoccupied ? styles.available : styles.reserved]}
+        onPress={() => navigation.navigate('TableDetailsScreen', { reserved })}
       >
         <Text style={styles.tableCardTitle}>{item.name} (ID: {item.id})</Text>
       </TouchableOpacity>

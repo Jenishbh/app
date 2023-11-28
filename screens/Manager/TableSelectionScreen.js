@@ -82,8 +82,8 @@ const TableManagementScreen = () => {
           .set({
             ...currentUserReservation
           });
-          await db.collection('Tables').doc(selectedTable.ref).update({
-            status: 'reserved'
+          await db.collection('Tables').doc(selectedTable.ref).collection('Reservation').doc(currentUserReservation.reservationId).update({
+            status: 'confirmed'
           });
         // Step 3: Update user's reservation data
         const newReservationData = {
