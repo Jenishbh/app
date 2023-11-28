@@ -41,7 +41,8 @@ const BufferScreen = () => {
     // Remove reservation from client and table side
     try {
       // Example: Remove reservation code here
-      await db.collection('UserData').doc(udata.email).collection('Reservation').doc(udata.reservationId).delete();
+      //keeping user side reservation as it is
+      //await db.collection('UserData').doc(udata.email).collection('Reservation').doc(udata.reservationId).delete();
       await db.collection('Tables').doc(udata.tableRef).collection('Reservation').doc(udata.reservationId).delete();
       // Clear the relevant AsyncStorage
       await AsyncStorage.removeItem('@UserStorage');
