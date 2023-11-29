@@ -62,7 +62,6 @@ const Manager_edit_menue = ({ navigation }) => {
         duration: duration,
         categoryid: categoryid,
       };
-
       console.log(updateditem);
     } else {
       console.log("Add new item");

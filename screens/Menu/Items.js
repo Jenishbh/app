@@ -82,7 +82,7 @@ const foods = [
     categoryid: 1,
     image: require("../../assets/food/Vegetable-Biryani.jpg"),
     details:
-      "A delicious and flavorful rice dish made with vegetables, spices, and herbs.",
+      " A delicious and flavorful rice dish made with vegetables, spices, and herbs.",
   },
   {
     id: 8,
