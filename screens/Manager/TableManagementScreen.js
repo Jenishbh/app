@@ -90,6 +90,7 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
             />
       
             <Text style={styles.title}>Reservation Details</Text>
+            <Text style={styles.title}>Name: {reservation.Name}</Text>
             
       
             <View style={styles.reservationDetails}>
