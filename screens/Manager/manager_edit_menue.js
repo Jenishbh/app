@@ -167,8 +167,8 @@ const Manager_edit_menue = ({ navigation }) => {
         }}
       />
 
-      <Button title="Save" style={styles.save} onPress={handleSave} />
-      <Button title="Delete" style={styles.save} onPress={handleDelete} />
+      <Button title="Save " style={styles.save} onPress={handleSave} />
+      <Button title="Delete " style={styles.save} onPress={handleDelete} />
     </ScrollView>
   );
 };
