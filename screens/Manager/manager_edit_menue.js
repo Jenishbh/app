@@ -15,18 +15,36 @@ const Manager_edit_menue = ({ navigation }) => {
   const [itemName, setitemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemdescription, setitemdescription] = useState("");
+  const [ingredients, setingredients] = useState("");
+  const [person, setperson] = useState("");
+  const [duration, setduration] = useState("");
+  const [categoryid, setcategoryid] = useState("");
 
   const handleValueChange = async (foodItem) => {
     if (foodItem != "Add New") {
-      const food = foods.filter((food) => food.name === foodItem);
-      setitemName(foodItem);
-      setItemPrice(food[0].price);
-      setitemdescription(food[0].details);
-      console.log(itemName);
+      const food = foods.find((food) => food.name === foodItem);
+      if (food) {
+        setitemName(foodItem);
+        setItemPrice(food.price);
+        setitemdescription(food.details);
+        setingredients(food.ingredients);
+        const person = food.person.toString();
+        setperson(person);
+        setduration(food.duration);
+        const categoryid = food.categoryid.toString();
+        setcategoryid(categoryid);
+        console.log(itemName);
+      } else {
+        console.log("no item found");
+      }
     } else {
       setitemName("");
       setItemPrice("");
       setitemdescription("");
+      setingredients("");
+      setperson("");
+      setduration("");
+      setcategoryid("");
       console.log("Add new item");
     }
   };
@@ -39,18 +57,54 @@ const Manager_edit_menue = ({ navigation }) => {
         ...food,
         price: itemPrice,
         details: itemdescription,
+        ingredients: ingredients,
+        person: person,
+        duration: duration,
+        categoryid: categoryid,
       };
 
       console.log(updateditem);
     } else {
       console.log("Add new item");
+      const newid = foods.length + 1;
+      const newitem = {
+        id: newid,
+        name: itemName,
+        ingredients: ingredients,
+        price: itemPrice,
+        person: person,
+        duration: duration,
+        categoryid: categoryid,
+        details: itemdescription,
+      };
+
+      console.log(newitem);
+      foods.push(newitem);
+      foodItems123.push(newitem.name);
     }
 
     navigation.navigate("Manager_home");
   };
 
+  const handleDelete = () => {
+    // Logic to delete item, update database, etc.
+    const food = foods.find((food) => food.name === itemName);
+    if (food) {
+      const index = foods.indexOf(food);
+
+      foods.splice(index, 1);
+      foodItems123.splice(index, 1);
+      const ids = foods.map((food) => food.id);
+
+      for (let i = index + 2; i < ids.length + 2; i++) {
+        console.log(i);
+        foods[i - 2].id = i - 1;
+      }
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.containeer}>
+    <ScrollView style={{ marginLeft: 20, marginTop: 20 }}>
       <Text>Select Item or add New</Text>
       <Picker
         selectedValue={itemName}
@@ -69,13 +123,38 @@ const Manager_edit_menue = ({ navigation }) => {
         style={styles.TextInput}
       />
       <TextInput
-        placeholder="Item price"
+        placeholder="Ingredientes"
+        value={ingredients}
+        onChangeText={setingredients}
+        style={styles.TextInput}
+      />
+      <TextInput
+        placeholder="Item Price"
         value={itemPrice}
         onChangeText={setItemPrice}
         style={styles.TextInput}
       />
       <TextInput
-        placeholder="Item Description"
+        placeholder="Person"
+        value={person}
+        onChangeText={setperson}
+        style={styles.TextInput}
+      />
+      <TextInput
+        placeholder="Duration"
+        value={duration}
+        onChangeText={setduration}
+        style={styles.TextInput}
+      />
+      <TextInput
+        placeholder="categoryid"
+        value={categoryid}
+        onChangeText={setcategoryid}
+        style={styles.TextInput}
+      />
+
+      <TextInput
+        placeholder="Item details"
         value={itemdescription}
         onChangeText={setitemdescription}
         multiline={true}
@@ -90,7 +169,8 @@ const Manager_edit_menue = ({ navigation }) => {
       />
 
       <Button title="Save" style={styles.save} onPress={handleSave} />
-    </SafeAreaView>
+      <Button title="Delete" style={styles.save} onPress={handleDelete} />
+    </ScrollView>
   );
 };
 
