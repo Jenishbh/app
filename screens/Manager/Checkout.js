@@ -114,7 +114,7 @@ const CheckoutScreen = ({ navigation, route }) => {
       {/* Split Receipt Toggle */}
       <View style={styles.splitReceiptContainer}>
         <Text style={styles.splitReceiptText}>Table: </Text>
-        <Text style={styles.splitReceiptText}>{udata.Table_Type}({udata.tableID}) </Text>
+        <Text style={styles.splitReceiptText}>{udata.tableType}({udata.tableID}) </Text>
       </View>
       <View style={styles.splitReceiptContainer}>
         <Text style={styles.splitReceiptText}>Date: </Text>

@@ -162,7 +162,7 @@ const createPanResponder = (itemId) => {
       </View>
       <View style={styles.splitReceiptContainer}>
       <Text style={styles.qrText}>Table: </Text>
-        <Text style={styles.qrText}>{udata.Table_Type}({udata.tableID})</Text>
+        <Text style={styles.qrText}>{udata.tableType}({udata.tableID})</Text>
       </View>
       <View style={styles.card}>
       {/* Food Items List */}

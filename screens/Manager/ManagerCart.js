@@ -17,6 +17,27 @@ const ManagerCart = ({navigation, route})=>{
     //const auth = getAuth();
     //const user = auth.currentUser;
     
+    const tableUpdate = async (storedData, cartItems) => {
+        try {
+            await db.collection('Tables').doc(storedData.tableRef)
+                    .collection('Reservation').doc(storedData.reservationId)
+                    .set({ foodDetails: cartItems }, { merge: true });
+        } catch (error) {
+            console.error("Error updating table reservation", error);
+        }
+    };
+
+    const userUpdate = async (storedData, cartItems) => {
+        try {
+            await db.collection('UserData').doc(storedData.email)
+                    .collection('Reservation').doc(storedData.reservationId)
+                    .set({ foodDetails: cartItems }, { merge: true });
+        } catch (error) {
+            console.error("Error updating user reservation", error);
+        }
+    };
+    
+    
     
     
     const addToCart = async (itemToAdd) => {
@@ -29,37 +50,34 @@ const ManagerCart = ({navigation, route})=>{
                 cartItems = JSON.parse(storedCart);
             }
     
-            // Check if the item already exists in the cart
             const existingIndex = cartItems.findIndex(item => item.id === itemToAdd.id);
     
             if (existingIndex > -1) {
-                // Update the quantity of the existing item
                 cartItems[existingIndex].qty += 1;
             } else {
-                // Add the new item to the cart
                 const newItem = {
                     id: itemToAdd.id,
                     name: itemToAdd.name,
                     qty: 1,
-                    salePrice: itemToAdd.price,                    
+                    salePrice: itemToAdd.price,
                     checked: 0,
                     duration: itemToAdd.duration,
                 };
                 cartItems.push(newItem);
             }
     
-            // Store the updated cart back to AsyncStorage
             await AsyncStorage.setItem('@FoodStorage', JSON.stringify(cartItems));
-            await db.collection('Tables').doc(storedData.tableRef).collection('Reservation').doc(reservationId).update({
-                foodDetails:cartItems
-            })
-            await db.collection('UserData').doc(storedData.email).collection('Reservation').doc(reservationId).update({
-                foodDetails:cartItems
-            })
+    
+            if (storedData) {
+                const parsedData = JSON.parse(storedData);
+                await tableUpdate(parsedData, cartItems);
+                await userUpdate(parsedData, cartItems);
+            }
         } catch (error) {
             console.error("Error adding item to cart", error);
         }
     };
+    
     
     const handlebook = async () => {
 

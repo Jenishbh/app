@@ -25,7 +25,7 @@ import OnBording from "../screens/Customer/OnBording";
 import Profile from "../screens/Customer/Profile";
 
 import Otp from "../screens/Welcome/Otp";
-
+import AssignTable from "../screens/Manager/AssignTable";
 import ReservationHome from "../screens/Customer/ReservationHome";
 import ReservationDetails from "../screens/Customer/ReservationDetails";
 import RegistrationHistory from "../screens/Customer/RegistrationHistory";
@@ -144,7 +144,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
         name="Sales Dashboard"
         component={Manager_home}
         options={{
-          tabBarIcon: () => <Icon name="dashboard" color="orange" size={28} />,
+          tabBarIcon: () => <Icon name="dashboard"  size={28} />,
           headerShown: false,
         }}
       />
@@ -152,7 +152,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
         name="EditMenu"
         component={Manager_home}
         options={{
-          tabBarIcon: () => <Icon name="edit" color="orange" size={28} />,
+          tabBarIcon: () => <Icon name="edit"  size={28} />,
           headerShown: false,
         }}
       />
@@ -182,6 +182,16 @@ const Manage_BottomNavigator = ({ navigation }) => {
         }}
       />
       <Tab.Screen
+        name="Walk-In"
+        component={AssignTable}
+        options={{
+          tabBarIcon: (color) => (
+            <Icon name="restaurant" color={color} size={28} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
         name="Live tables"
         component={LiveTable}
         options={{
@@ -191,22 +201,21 @@ const Manage_BottomNavigator = ({ navigation }) => {
           headerShown: false,
         }}
       />
-      <Tab.Screen
-        name="About"
-        component={Manager_home}
-        options={{
-          tabBarIcon: (color) => (
-            <Icon name="restaurant" color={color} size={28} />
-          ),
-          headerShown: false,
-        }}
-      />
+
     </Tab.Navigator>
   );
 };
 
 const AuthNavigator = () => (
   <Stack.Navigator>
+
+
+<Stack.Screen
+      name="Manager_home"
+      component={Manage_BottomNavigator}
+      options={{ headerShown: false }}
+    />
+
 
     <Stack.Screen
       name="Signin"
@@ -343,9 +352,10 @@ const AuthNavigator = () => (
       component={TableDetailsScreen}
       options={{ headerShown: false }}
     />
-<Stack.Screen
-      name="Manager_home"
-      component={Manage_BottomNavigator}
+
+        <Stack.Screen
+      name="AssignTable"
+      component={AssignTable}
       options={{ headerShown: false }}
     />
 

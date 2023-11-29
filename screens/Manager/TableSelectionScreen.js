@@ -4,7 +4,7 @@ import { db } from '../../database/firebase'; // Adjust this import based on you
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 
-const TableManagementScreen = () => {
+const TableManagementScreen = ({navigation}) => {
   const [tables, setTables] = useState([]);
   const [id, setid]= useState([])
   const [selectedTable, setSelectedTable] = useState(null);
@@ -69,51 +69,71 @@ const TableManagementScreen = () => {
 
 
   const confirmTableSelection = async () => {
-    if (selectedTable && currentUserReservation) {
-      try {
-        // Step 1: Remove reservation data from old table
-        await db.collection('Tables').doc(currentUserReservation.tableRef)
-          .collection('Reservation').doc(currentUserReservation.reservationId)
-          .delete();
+    try {
+      let reservationId;
+      // Check if this is an existing reservation or a walk-in
+      if (currentUserReservation && currentUserReservation.reservationId) {
+        // Existing reservation
+        reservationId = currentUserReservation.reservationId;
   
-        // Step 2: Add reservation data to new table
-        await db.collection('Tables').doc(selectedTable.ref)
-          .collection('Reservation').doc(currentUserReservation.reservationId)
-          .set({
-            ...currentUserReservation
-          });
-          await db.collection('Tables').doc(selectedTable.ref).collection('Reservation').doc(currentUserReservation.reservationId).update({
-            status: 'confirmed'
-          });
-        // Step 3: Update user's reservation data
-        const newReservationData = {
-          ...currentUserReservation,
-          tableID: selectedTable.id,
-          tableRef: selectedTable.ref,
-          tableType: selectedTable.name // or whatever field represents the table type
-        };
-         
+        // Remove reservation data from old table (if any)
+        await db.collection('Tables').doc(currentUserReservation.tableRef)
+          .collection('Reservation').doc(reservationId)
+          .delete();
+        await db.collection('Tables').doc(currentUserReservation.tableRef)
+        .collection('Reservation').update({
+          status: 'available'
+        })
         
-        await db.collection('UserData').doc(currentUserReservation.email)
-          .collection('Reservation').doc(currentUserReservation.reservationId)
-          .update(newReservationData);
-        // Step 4: Update user's reservation data in AsyncStorage
-        await AsyncStorage.setItem('@UserStorage', JSON.stringify(newReservationData));
-        // Confirmation message
-        Alert.alert("Reservation Updated", `Your reservation has been moved to table ${selectedTable.name}`);
-        navigation.navigate('FoodSelectionScreen');
-      } catch (error) {
-        console.error("Error updating reservation: ", error);
-        Alert.alert("Error", "Failed to update reservation.");
+      } else {
+        // Walk-in reservation
+        reservationId = db.collection('Tables').doc(selectedTable.ref).collection('Reservation').doc().id;
+        await db.collection('Tables').doc(selectedTable.ref).update({ status: 'reserved'})
       }
+  
+      // Add reservation data to the selected table
+      const reservationData = {
+        ...currentUserReservation,
+        reservationId: reservationId,
+        tableID: selectedTable.id,
+        tableRef: selectedTable.ref,
+        tableType: selectedTable.name, // or whatever field represents the table type
+        status: 'confirmed'
+      };
+  
+      await db.collection('Tables').doc(selectedTable.ref)
+        .collection('Reservation').doc(reservationId)
+        .set(reservationData);
+
+      await db.collection('Tables').doc(selectedTable.ref).update({ status: 'reserved'})
+  
+      // Update user's reservation data in UserData collection
+      await db.collection('UserData').doc(reservationData.email)
+        .collection('Reservation').doc(reservationId)
+        .set(reservationData);
+  
+      // Update user's reservation data in AsyncStorage
+      await AsyncStorage.setItem('@UserStorage', JSON.stringify(reservationData));
+      
+      // Confirmation message
+      if (currentUserReservation && currentUserReservation.reservationId) {
+        Alert.alert("Reservation Updated", `Your reservation has been moved to table ${selectedTable.name}`);
+      } else {
+        Alert.alert("Reservation Confirmed", `Your table ${selectedTable.name} is confirmed.`);
+      }
+      navigation.navigate('FoodSelectionScreen');
+    } catch (error) {
+      console.error("Error handling reservation: ", error);
+      Alert.alert("Error", "Failed to process reservation.");
     }
   };
+  
 
   
 
   const renderTableItem = ({ item }) => {
     const isOccupied = item.status === 'reserved';
-    const isCurrentUserTable = currentUserReservation?.tableId === item.id;
+    
     return (
       <TouchableOpacity 
         style={[
