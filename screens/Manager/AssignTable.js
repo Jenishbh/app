@@ -1,123 +1,163 @@
-import { Header } from "@react-navigation/stack";
 import React, { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  SafeAreaView,
-  Animated,
-} from "react-native";
-import { StyleSheet } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import Table from "../Menu/Table.js";
-
-const tablesnames = Table.map((table) => table.name);
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StyleSheet, Alert } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const AssignTable = ({ navigation }) => {
-  const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [guests, setGuests] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
 
-  const [table, setTable] = useState();
-  const handleValueChange = async (itemValue, itemIndex) => {
-    setTable(itemValue);
-    await AsyncStorage.setItem("Atable", itemValue);
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
   };
 
-  const handleSubmit = async () => {
-    const Table = await AsyncStorage.getItem("Atable");
-    // if (table === Table) {
-    //   alert("Table already assigned");
-    //   return;
-    // }
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
 
-    console.log(Name);
-    console.log(Email);
-    console.log(Table);
-    console.log(table);
-    //tables.splice(tables.indexOf(table), 1);
-    const time = new Date();
-    console.log(time);
+  const handleConfirmDate = (selectedDate) => {
+    setDate(selectedDate);
+    hideDatePicker();
+  };
+
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleConfirmTime = (selectedTime) => {
+    setDate(selectedTime);
+    hideTimePicker();
+  };
+
+  const storeUserDetails = async () => {
+    try {
+      const userDetails = JSON.stringify({ name, email, guests, date });
+      await AsyncStorage.setItem('@UserStorage', userDetails);
+      navigateToTableSelection();
+    } catch (e) {
+      Alert.alert("Error", "Failed to store user details.");
+    }
+  };
+
+  const navigateToTableSelection = () => {
+    navigation.navigate("TableSelectionScreen");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Assign Table</Text>
+      <View style={styles.formContainer}>
+        <Text style={styles.header}>Customer Check-In</Text>
 
-      <TextInput
-        placeholder="Enter Name"
-        onChangeText={(Name) => setName(Name)}
-        defaultValue={Name}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Enter Email"
-        onChangeText={(Email) => setEmail(Email)}
-        defaultValue={Email}
-        style={styles.input}
-      />
+        <TextInput
+          placeholder="Enter Name"
+          onChangeText={setName}
+          value={name}
+          style={styles.input}
+        />
 
-      <Picker
-        selectedValue={table}
-        style={styles.select}
-        onValueChange={handleValueChange}
-      >
-        {tablesnames.map((table) => (
-          <Picker.Item key={table} label={table} value={table} />
-        ))}
-      </Picker>
-      <TouchableOpacity
-        onPress={() => {
-          handleSubmit();
-        }}
-        style={styles.button}
-      >
-        <Text style={styles.text}>Assign</Text>
-      </TouchableOpacity>
+        <TextInput
+          placeholder="Enter Email"
+          onChangeText={setEmail}
+          value={email}
+          style={styles.input}
+        />
+
+        <TextInput
+          placeholder="Number of Guests"
+          onChangeText={setGuests}
+          value={guests}
+          keyboardType="number-pad"
+          style={styles.input}
+        />
+
+        <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
+          <Text style={styles.buttonText}>Select Date</Text>
+        </TouchableOpacity>
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirmDate}
+          onCancel={hideDatePicker}
+        />
+
+        <TouchableOpacity onPress={showTimePicker} style={styles.dateButton}>
+          <Text style={styles.buttonText}>Select Time</Text>
+        </TouchableOpacity>
+        <DateTimePickerModal
+          isVisible={isTimePickerVisible}
+          mode="time"
+          onConfirm={handleConfirmTime}
+          onCancel={hideTimePicker}
+        />
+
+        <TouchableOpacity
+          onPress={storeUserDetails}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Proceed to Table Selection</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  // ... other styles remain the same
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  formContainer: {
+    width: '90%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   header: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 40,
-    top: 0,
-    borderRadius: 10,
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#333",
   },
   input: {
-    width: 300,
-    height: 40,
+    height: 50,
     borderColor: "gray",
     borderWidth: 1,
-    marginBottom: 10,
-    padding: 10,
-  },
-  select: {
-    width: 300,
-    height: 50,
-  },
-  button: {
-    backgroundColor: "#5C4742",
     borderRadius: 10,
     padding: 10,
-    position: "absolute",
-    height: 80,
-    width: 150,
-    bottom: 20,
-    right: 20,
+    marginBottom: 15,
   },
-  text: {
-    fontSize: 30,
-    color: "#5FA5B5",
-    textAlign: "center",
+  button: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+  },
+  dateButton: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: "center",
+    marginBottom: 15,
   },
 });
 
