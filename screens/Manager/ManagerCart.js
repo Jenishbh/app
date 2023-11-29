@@ -7,6 +7,7 @@ import { icons } from '../Menu/food'
 //import { getAuth } from "firebase/auth";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../../database/firebase'
 
 
 
@@ -21,6 +22,7 @@ const ManagerCart = ({navigation, route})=>{
     const addToCart = async (itemToAdd) => {
         try {
             const storedCart = await AsyncStorage.getItem('@FoodStorage');
+            const storedData = await AsyncStorage.getItem('@UserStorage');
             let cartItems = [];
     
             if (storedCart !== null) {
@@ -39,9 +41,8 @@ const ManagerCart = ({navigation, route})=>{
                     id: itemToAdd.id,
                     name: itemToAdd.name,
                     qty: 1,
-                    salePrice: itemToAdd.price,
-                    image: itemToAdd.image,
-                    checked: 1,
+                    salePrice: itemToAdd.price,                    
+                    checked: 0,
                     duration: itemToAdd.duration,
                 };
                 cartItems.push(newItem);
@@ -49,7 +50,12 @@ const ManagerCart = ({navigation, route})=>{
     
             // Store the updated cart back to AsyncStorage
             await AsyncStorage.setItem('@FoodStorage', JSON.stringify(cartItems));
-    
+            await db.collection('Tables').doc(storedData.tableRef).collection('Reservation').doc(reservationId).update({
+                foodDetails:cartItems
+            })
+            await db.collection('UserData').doc(storedData.email).collection('Reservation').doc(reservationId).update({
+                foodDetails:cartItems
+            })
         } catch (error) {
             console.error("Error adding item to cart", error);
         }

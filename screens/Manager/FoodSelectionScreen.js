@@ -19,7 +19,7 @@ const Checkout = ({ navigation}) => {
         try {
           const storedCartItems = await AsyncStorage.getItem('@FoodStorage');
           const storedUdata = await AsyncStorage.getItem('@UserStorage');
-  
+          console.log(storedCartItems)
           if (storedCartItems !== null) {
             const foodItemsArray = JSON.parse(storedCartItems);
             // Calculate total price for each item immediately when setting the state
@@ -84,6 +84,7 @@ const Checkout = ({ navigation}) => {
           name: item.name,
           qty: item.qty,
           salePrice: item.salePrice,
+          duration: item.duration,
         })),
        
       });

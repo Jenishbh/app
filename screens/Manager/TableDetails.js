@@ -16,7 +16,8 @@ const TableDetailsScreen = ({ navigation, route}) => {
       qty: food.qty,
       id: food.id,
       duration: food.duration,
-      orderTime: item.orderTime
+      orderTime: item.orderTime,
+      checked: food.checked,
 
     }
   })
@@ -167,7 +168,7 @@ const TableDetailsScreen = ({ navigation, route}) => {
 
       {/* Checkout Button */}
       <TouchableOpacity style={styles.checkoutButton} >
-        <Text style={styles.checkoutButtonText}>Confirm Order</Text>
+        <Text style={styles.checkoutButtonText}>Done</Text>
         
       </TouchableOpacity>
     </ScrollView>

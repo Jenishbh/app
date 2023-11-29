@@ -47,6 +47,7 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
           // Store the food details in AsyncStorage
           await AsyncStorage.setItem('@FoodStorage', JSON.stringify(reservation.foodDetails));
           // Store the user details in AsyncStorage
+          
           await AsyncStorage.setItem('@UserStorage', JSON.stringify({
               name: reservation.Name,
               Table_Type: reservation.Table_Type,
