@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
-import { auth, db } from '../../database/firebase';
+import { auth, db, storage } from '../../database/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import * as firebase from 'firebase/compat'
 export default function Profile({ navigation }) {
 
 
@@ -47,30 +47,46 @@ export default function Profile({ navigation }) {
     }, []);
 
     const handleSave = async () => {
+      if (imgUrl) {
         try {
-            const updateObj = {};
-            if (username) updateObj.name = username;
-            if (phone) updateObj.phone = phone;
-            if (imgUrl) updateObj.imgUrl = imgUrl;
-            console.log(imgUrl)
-            
-
-            // Update Firestore
-            await db.collection('UserData').doc(email).update(updateObj);
-
-            // Update AsyncStorage
-            const storedData = await AsyncStorage.getItem('user_data');
-            if (storedData) {
-                const udata = JSON.parse(storedData);
-                const updatedData = { ...udata, ...updateObj };
-                await AsyncStorage.setItem('user_data', JSON.stringify(updatedData));
+          // Upload the image to Firebase Storage
+          const response = await fetch(imgUrl);
+          const blob = await response.blob();
+          const storageRef = storage.ref().child(`user_photos/${auth.currentUser.uid}.jpg`);
+          const uploadTask = storageRef.put(blob);
+  
+          // Listen for state changes, errors, and completion of the upload.
+          uploadTask.on(
+            firebase.storage.TaskEvent.STATE_CHANGED,
+            null,
+            (error) => {
+              console.error("Error uploading photo:", error);
+              Alert.alert('Error uploading photo. Please try again.');
+            },
+            () => {
+              // Upload completed successfully, now get the download URL
+              uploadTask.snapshot.ref.getDownloadURL().then(async (downloadURL) => {
+                console.log('File available at', downloadURL);
+                setImgUrl(downloadURL);
+                // Update Firestore
+                const updateObj = { name: username, phone, imgUrl: downloadURL };
+                await db.collection('UserData').doc(email).update(updateObj);
+                // Update AsyncStorage
+                const storedData = await AsyncStorage.getItem('user_data');
+                if (storedData) {
+                  const udata = JSON.parse(storedData);
+                  const updatedData = { ...udata, ...updateObj };
+                  await AsyncStorage.setItem('user_data', JSON.stringify(updatedData));
+                }
+                Alert.alert('Profile updated successfully!');
+              });
             }
-
-            Alert.alert('Update successfully!');
+          );
         } catch (error) {
-            console.error("Error updating user data: ", error);
-            Alert.alert('Error updating data. Please try again.');
+          console.error("Error updating profile: ", error);
+          Alert.alert('Error updating profile. Please try again.');
         }
+      }
     };
 
     const showImagePicker = async () => {

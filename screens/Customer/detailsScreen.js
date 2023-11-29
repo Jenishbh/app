@@ -38,6 +38,7 @@ const DetailsScreen = ({navigation, route})=>{
                 const newItem = {
                     id: itemToAdd.id,
                     name: itemToAdd.name,
+                    checked: 0,
                     qty: 1,
                     salePrice: itemToAdd.price,
                     duration: itemToAdd.duration
