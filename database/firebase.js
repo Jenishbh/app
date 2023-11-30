@@ -2,8 +2,9 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import 'firebase/compat/storage'
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -30,7 +31,8 @@ if (!firebase.apps.length) {
   const auth = firebase.auth();
   const db = firebase.firestore();
   const database = firebase.database();
+  const storage = firebase.storage();
 
-export { auth,db,database };
+export { auth,db,database,storage };
 //const analytics = getAnalytics(app);
 

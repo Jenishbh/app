@@ -24,7 +24,7 @@ const Signin = ({ navigation }) => {
   const [showPass, setShowPass] = React.useState(false)
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
-  const [imgUrl, setImgUrl] = useState('');
+  
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -66,14 +66,14 @@ const Signin = ({ navigation }) => {
           email: userData.email,
           username: userData.name,
           phone: userData.phone,
-          imgUrl: userData.imageUrl
+          
         }));
   
         // Update state with user details
         setUsername(userData.name);
         setEmail(userData.email);
         setPhone(userData.phone);
-        setImgUrl(userData.imageUrl);
+        
       } else {
         console.error("No user details found in Firestore for:", authUser.email);
         throw new Error("User details not found");

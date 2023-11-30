@@ -1,7 +1,7 @@
 import React from "react";
 import "react-native-gesture-handler";
 import { createStackNavigator } from "@react-navigation/stack";
-``;
+
 import Login from "../screens/Welcome/Login";
 import Forget_pass from "../screens/Welcome/Forget_pass";
 import Registration from "../screens/Welcome/Signup";
@@ -12,6 +12,7 @@ import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Con from "react-native-vector-icons/Octicons";
+import Ion from 'react-native-vector-icons/MaterialCommunityIcons'
 import Menucard from "../screens/Customer/Menucard";
 import Error from "../screens/Customer/Error";
 //import Reservation from '../screens/Customer/Reservation'
@@ -20,16 +21,11 @@ import Manager_home from "../screens/Manager/manager_home";
 import QRScannerScreen from "../screens/Manager/QRScannerScreen";
 import DetailsScreen from "../screens/Customer/detailsScreen";
 import OnBording from "../screens/Customer/OnBording";
-//import Signin from '../screens/Welcome/Signin';
+
 import Profile from "../screens/Customer/Profile";
-//import Manager_Menu from '../screens/Manager/Manager_menu';
-//import Revenue from '../screens/Manager/Revenue';
-//import Waitinglist from '../screens/Manager/Waiting_list';
-//import Menu_edit from '../screens/Manager/Menu_edit';
-//import Menu_input from '../screens/Manager/Menu_input';
-//import Signup from '../screens/Welcome/Signup';
+
 import Otp from "../screens/Welcome/Otp";
-//import Tabnavigator from '../screens/Manager/Tabnavigator';
+import AssignTable from "../screens/Manager/AssignTable";
 import ReservationHome from "../screens/Customer/ReservationHome";
 import ReservationDetails from "../screens/Customer/ReservationDetails";
 import RegistrationHistory from "../screens/Customer/RegistrationHistory";
@@ -41,21 +37,14 @@ import ManagerMenu from "../screens/Manager/ManagerMenu";
 import ManagerCart from "../screens/Manager/ManagerCart";
 import CheckoutScreen from "../screens/Manager/Checkout";
 import BufferScreen from "../screens/Manager/Buffer";
-//import Dashboard from '../screens/Manager/dash/dashboard';
+
 import CartScreen from "../screens/Customer/CartScreen";
 import Confirm_res from "../screens/Customer/Confirm_res";
 import LiveTable from "../screens/Manager/LiveTable";
 import TableDetailsScreen from "../screens/Manager/TableDetails";
-//import Scanner from '../screens/Manager/BarCodeScanPage';
-//import TakeOrder from '../screens/Manager/OrderTakenPage';
-//import CheckOut from '../screens/Manager/CheckOutPage';
-//import Orderpage from '../screens/Manager/dash/Orderpage';
-//import Sales from '../screens/Manager/dash/sales';
 import OrderSubmit from "../screens/Customer/OrderSubmit";
-//import Table_view from "../screens/Manager/manager_view_tables";
-//import Manager_home from "../screens/Manager/manager_home";
-//
-//
+
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const BottomNavigator = ({ navigation }) => {
@@ -135,13 +124,99 @@ const BottomNavigator = ({ navigation }) => {
   );
 };
 
+
+//----------------------------------------------------------------------------
+
+const Manage_BottomNavigator = ({ navigation }) => {
+  return (
+    <Tab.Navigator
+      tabBarOption={{
+        style: {
+          height: 55,
+          borderTopWidth: 0,
+          elevation: 0,
+        },
+        showLabel: false,
+        activeTintColor: "orange",
+      }}
+    >
+      <Tab.Screen
+        name="Sales Dashboard"
+        component={Manager_home}
+        options={{
+          tabBarIcon: () => <Icon name="dashboard"  size={28} />,
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="EditMenu"
+        component={Manager_home}
+        options={{
+          tabBarIcon: () => <Icon name="edit"  size={28} />,
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="QR scanner"
+        component={QRScannerScreen}
+        options={{
+          tabBarIcon: (color) => (
+            <View
+              style={{
+                height: 50,
+                width: 60,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "white",
+                borderColor: "orange",
+                borderWidth: 2,
+                borderRadius: 30,
+                top: -25,
+                elevation: 5,
+              }}
+            >
+              <Icon name="qr-code" color={color} size={28} />
+            </View>
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Walk-In"
+        component={AssignTable}
+        options={{
+          tabBarIcon: (color) => (
+            <Icon name="restaurant" color={color} size={28} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Live tables"
+        component={LiveTable}
+        options={{
+          tabBarIcon: (color) => (
+            <Ion name="table-picnic" color={color} size={28} />
+          ),
+          headerShown: false,
+        }}
+      />
+
+    </Tab.Navigator>
+  );
+};
+
 const AuthNavigator = () => (
   <Stack.Navigator>
 
 
+<Stack.Screen
+      name="Manager_home"
+      component={Manage_BottomNavigator}
+      options={{ headerShown: false }}
+    />
 
 
-    
     <Stack.Screen
       name="Signin"
       component={Login}
@@ -277,9 +352,10 @@ const AuthNavigator = () => (
       component={TableDetailsScreen}
       options={{ headerShown: false }}
     />
-<Stack.Screen
-      name="Manager_home"
-      component={Manager_home}
+
+        <Stack.Screen
+      name="AssignTable"
+      component={AssignTable}
       options={{ headerShown: false }}
     />
 

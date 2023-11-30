@@ -11,3 +11,29 @@ exports.setManagerRole = functions.auth.user().onCreate((user) => {
     return admin.auth().setCustomUserClaims(user.uid, {role: "user"});
   }
 });
+
+exports.deleteOldReservations = functions.pubsub
+    .schedule("every 24 hours").onRun(async (context) => {
+      const today = new Date();
+      const tablesRef = admin.firestore().collection("Tables");
+
+      const tablesSnapshot = await tablesRef.get();
+
+      for (const tableDoc of tablesSnapshot.docs) {
+        const reservationsRef = tableDoc.ref.collection("Reservation");
+        const reservationsSnapshot = await reservationsRef
+            .where("Date", "<", admin.firestore.Timestamp.fromDate(today))
+            .get();
+
+        const batch = admin.firestore().batch();
+        reservationsSnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+      }
+
+      return null;
+    });
+
+

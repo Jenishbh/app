@@ -2,6 +2,7 @@ import { Text, View, SafeAreaView, StyleSheet,Dimensions,Image,FlatList,Touchabl
 import React, {useState, useEffect} from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import Table from '../Menu/Table';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {db,auth} from '../../database/firebase'
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -14,21 +15,26 @@ const cardWidth = width - 20;
 function ReservationHome({navigation}) {
   //const auth = getAuth();
   //const user = auth.currentUser;
-  const [imgUrl, setImgUrl] = useState()
+
   const [firstname, setFirstname] = useState('')
-  //useEffect(()=>{
-  //  db
-  //  .collection('UserData').doc(user.email).get().then(DocumentSnapshot => {
-  //    if (DocumentSnapshot.exists){
-  //      const udata = DocumentSnapshot.data()
-  //      
-  //      
-  //      setFirstname(udata.firstName)
-  //      
-  //      setImgUrl(udata.imageUrl)
-  //    }
-  //  })
-  //},[])
+  useEffect(() => {
+
+
+    const fetchUserData = async () => {
+      try {
+          const storedData = await AsyncStorage.getItem('user_data');
+          if (storedData) {
+              const udata = JSON.parse(storedData);
+              setFirstname(udata.username || '');
+              
+          }
+      } catch (error) {
+          console.error("Error fetching user data from AsyncStorage:", error);
+          Alert.alert('Error fetching user data. Please try again.');
+      }
+  };
+  fetchUserData();
+}, []);
 
 
   // ... rest of your component
@@ -101,11 +107,7 @@ function ReservationHome({navigation}) {
   
           </View>
   
-          <Image 
-          source={{uri: imgUrl}} 
-          style={{height:50, width: 50, borderRadius: 25}}
-  
-          />
+
         </View>
    
         <View style={{

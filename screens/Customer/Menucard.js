@@ -14,7 +14,7 @@ const cardWidth = width / 2 - 20;
 function Menucard({ navigation }) {
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
     const [filteredList, setFilteredList] = useState(foods);
-    const [imgUrl, setImgUrl] = useState();
+    
     const [username, setUsername] = useState('');
     
     useEffect(() => {
@@ -32,7 +32,7 @@ function Menucard({ navigation }) {
             if (storedData) {
                 const udata = JSON.parse(storedData);
                 setUsername(udata.username || '');
-                setImgUrl(udata.imgUrl || '');
+                
             }
         } catch (error) {
             console.error("Error fetching user data from AsyncStorage:", error);
@@ -146,7 +146,7 @@ function Menucard({ navigation }) {
                         Help yourself to select an order
                     </Text>
                 </View>
-                <Image source={{ uri: imgUrl }} style={{ height: 50, width: 50, borderRadius: 25 }} />
+                
             </View>
             <View style={{marginTop:40,
                           flexDirection: 'row',

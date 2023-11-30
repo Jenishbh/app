@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Switch,TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icona from 'react-native-vector-icons/MaterialIcons'; // Make sure to install this package
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-
+import {db, storage } from '../../database/firebase';
+import { captureRef } from 'react-native-view-shot';
 
 const CheckoutScreen = ({ navigation, route }) => {
   const [foodItems, setFoodItems] = useState([]);
   const [udata, setudata] = useState([])
   const [selectedTipPercentage, setSelectedTipPercentage] = useState(null);
   const [customTip, setCustomTip] = useState('');
-
+  const safeAreaViewRef = useRef();
 
 
   useFocusEffect(
@@ -46,10 +47,41 @@ const CheckoutScreen = ({ navigation, route }) => {
 
 
   // Function to handle the checkout process
-  const handleCheckout = () => {
-      navigation.navigate('BufferScreen')
-  };
 
+  const saveScreenshot = async () => {
+    try {
+      // Capture screenshot
+      const uri = await captureRef(safeAreaViewRef, {
+        format: 'png',
+        quality: 0.8,
+      });
+
+      // Create a reference to the Firebase Storage
+      const storageRef = storage.ref();
+      // You might want to customize the path and file name
+      const screenshotRef = storageRef.child(`screenshots/${udata.reservationId}.png`);
+
+      // Upload the file
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      await screenshotRef.put(blob);
+
+      // Get the download URL
+      const downloadURL = await screenshotRef.getDownloadURL();
+
+      // Update the user's reservation with the image URL
+      await db.collection('UserData').doc(udata.email)
+          .collection('Reservation').doc(udata.reservationId)
+          .update({ receiptImageUrl: downloadURL });
+
+      alert('Receipt saved to reservation!');
+    } catch (error) {
+      console.error("Failed to save screenshot", error);
+      alert('An error occurred!');
+    }
+
+    navigation.navigate('BufferScreen');
+};
 
   // Function to handle tip selection
   const handleSelectTip = (percentage) => {
@@ -72,7 +104,7 @@ const CheckoutScreen = ({ navigation, route }) => {
 
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} ref={safeAreaViewRef}>
       {/* QR Code Section */}
       <View style={styles.qrContainer}>
         <Image style={styles.qrCode} source={require('../../assets/third.png')} />
@@ -82,11 +114,11 @@ const CheckoutScreen = ({ navigation, route }) => {
       {/* Split Receipt Toggle */}
       <View style={styles.splitReceiptContainer}>
         <Text style={styles.splitReceiptText}>Table: </Text>
-        <Text style={styles.splitReceiptText}>{udata.Table_Type}({udata.tableID}) </Text>
+        <Text style={styles.splitReceiptText}>{udata.tableType}({udata.tableID}) </Text>
       </View>
       <View style={styles.splitReceiptContainer}>
         <Text style={styles.splitReceiptText}>Date: </Text>
-        <Text style={styles.splitReceiptText}>{udata.Table_Type}({udata.tableID}) </Text>
+        <Text style={styles.splitReceiptText}>{udata.Date} </Text>
       </View>
       <View style={styles.card}>
       {/* Food Items List */}
@@ -145,7 +177,7 @@ const CheckoutScreen = ({ navigation, route }) => {
     </View>
     </View>
       {/* Checkout Button */}
-      <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
+      <TouchableOpacity style={styles.checkoutButton} onPress={saveScreenshot}>
         <Text style={styles.checkoutButtonText}>Checkout</Text>
       </TouchableOpacity>
     </ScrollView>

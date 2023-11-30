@@ -58,10 +58,7 @@ export default function Manager_home({ navigation }) {
           navigation.navigate("QRScannerScreen");
         }}
       >
-        <Image
-          source={require("../../assets/qr-code-scan-icon.png")}
-          style={styles.scanIcon}
-        />
+
       </TouchableOpacity>
 
       <View style={styles.switchContainer}>
@@ -77,28 +74,6 @@ export default function Manager_home({ navigation }) {
         />
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Menu"
-          btnContainer={{
-            height: 40,
-            width: 130,
-            right: 40,
-            borderRadius: 20,
-          }}
-          //onPress={() => navigation.navigate("Manager_Menu")}
-        />
-        <Button
-          title="Report"
-          btnContainer={{
-            height: 40,
-            width: 130,
-            left: 40,
-            borderRadius: 20,
-          }}
-          onPress={() => navigation.navigate("LiveTable")}
-        />
-      </View>
     </SafeAreaView>
   );
 }

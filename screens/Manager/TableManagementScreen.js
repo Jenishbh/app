@@ -47,6 +47,7 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
           // Store the food details in AsyncStorage
           await AsyncStorage.setItem('@FoodStorage', JSON.stringify(reservation.foodDetails));
           // Store the user details in AsyncStorage
+          
           await AsyncStorage.setItem('@UserStorage', JSON.stringify({
               name: reservation.Name,
               tableType: reservation.Table_Type,
@@ -89,6 +90,7 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
             />
       
             <Text style={styles.title}>Reservation Details</Text>
+            <Text style={styles.title}>Name: {reservation.Name}</Text>
             
       
             <View style={styles.reservationDetails}>
