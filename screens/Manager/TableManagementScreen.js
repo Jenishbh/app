@@ -49,7 +49,7 @@ const ReservationDetailsScreen = ({ navigation, route }) => {
           // Store the user details in AsyncStorage
           await AsyncStorage.setItem('@UserStorage', JSON.stringify({
               name: reservation.Name,
-              Table_Type: reservation.Table_Type,
+              tableType: reservation.Table_Type,
               tableID: reservation.tableID,
               reservationId: reservation.reservationId,
               email: reservation.email,
