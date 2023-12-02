@@ -5,26 +5,38 @@ import {
     TouchableHighlight 
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { foods, categories } from '../Menu/food';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {db} from '../../database/firebase'
 
 const { width } = Dimensions.get('screen');
 const cardWidth = width / 2 - 20;
 
 function Menucard({ navigation }) {
     const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
-    const [filteredList, setFilteredList] = useState(foods);
-    
+    const [menuItems, setMenuItems] = useState([]);
+    const [filteredList, setFilteredList] = useState(menuItems);
+    const [categories, setcategories] = useState([])
     const [username, setUsername] = useState('');
     
+
     useEffect(() => {
-      const currentCategory = categories[selectedCategoryIndex];
-      if (currentCategory) {
-          const filtered = foods.filter(food => food.categoryid === currentCategory.id);
-          setFilteredList(filtered);
-      } else {
-          setFilteredList(foods);  // If no category is selected, show all foods
-      }
+      const fetchMenuItems = async () => {
+            const menuCollection = db.collection('Menu');
+            const snapshot = await menuCollection.get();
+            const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setMenuItems(items);
+            setFilteredList(items);
+        };
+
+        fetchMenuItems();
+
+        const fetchcategory= async () =>{
+            const categoryitem = db.collection('Category')
+            const snapshot = await categoryitem.get()
+            const items = snapshot.docs.map(doc=> ({id: doc.id, ...doc.data()}))
+            setcategories(items)
+        }
+        fetchcategory()
 
       const fetchUserData = async () => {
         try {
@@ -42,9 +54,19 @@ function Menucard({ navigation }) {
 
     fetchUserData();
     }, [selectedCategoryIndex]);
+
+    useEffect(() => {
+        const currentCategory = categories[selectedCategoryIndex];
+        if (currentCategory) {
+            const filtered = menuItems.filter(item => item.categoryid === currentCategory.id);
+            setFilteredList(filtered);
+        } else {
+            setFilteredList(menuItems);
+        }
+    }, [selectedCategoryIndex, menuItems]);
   
     const onSearch = useCallback((text) => {
-        const tempList = foods.filter(item => {
+        const tempList = menuItems.filter(item => {
             const itemData = item.name.toUpperCase();
             const textData = text.toUpperCase();
             return itemData.includes(textData);
@@ -78,7 +100,7 @@ function Menucard({ navigation }) {
                     ]}>
                         <View style={styles.categorryBtnImgCon}>
                             <Image 
-                                source={category.image} 
+                                source={{ uri: category.image }} 
                                 style={{ height:35, width:35, resizeMode: 'cover' }} 
                             />
                         </View>
@@ -103,7 +125,7 @@ function Menucard({ navigation }) {
             onPress={() => navigation.navigate('DetailsScreen', food)}>
             <View style={styles.card}>
                 <View style={{ alignItems: 'center', top:-30 }}>
-                    <Image source={food.image} style={{ height: 120, width: 120, borderRadius:10, }} />
+                    <Image source={{ uri: food.image }} style={{ height: 120, width: 120, borderRadius:10, }} />
                 </View>
                 <View style={{ marginHorizontal: 10, flex:1}}>
                     <Text style={{ fontSize: 17, fontWeight: 'bold', textAlign: 'center', maxHeight:44 }}>

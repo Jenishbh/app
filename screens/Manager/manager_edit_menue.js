@@ -1,206 +1,130 @@
-import React, { useState } from "react";
-import { SafeAreaView, Text, Button, TextInput, Image } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { StyleSheet } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import foods from "../Menu/Items.js";
-import { NavigationContainer } from "@react-navigation/native";
-import { ScrollView } from "react-native-gesture-handler";
-import Manager_home from "./manager_home.js";
+import React, { useState } from 'react';
+import { View, Button, TextInput, ScrollView, StyleSheet, Alert } from 'react-native';
+import { categories, foods } from '../Menu/food'; // Adjust the path as needed
+import { db } from '../../database/firebase';
+const ManagerEditMenu = ({ route, navigation }) => {
+  const initialFood = route.params || {};
+  const [foodDetails, setFoodDetails] = useState(initialFood);
+  
+  const handleChange = (name, value) => {
+    setFoodDetails(prevDetails => ({ ...prevDetails, [name]: value }));
+  };
 
-let foodItems123 = foods.map((food) => food.name);
-foodItems123.push("Add New");
-
-const Manager_edit_menue = ({ navigation }) => {
-  const [itemName, setitemName] = useState("");
-  const [itemPrice, setItemPrice] = useState("");
-  const [itemdescription, setitemdescription] = useState("");
-  const [ingredients, setingredients] = useState("");
-  const [person, setperson] = useState("");
-  const [duration, setduration] = useState("");
-  const [categoryid, setcategoryid] = useState("");
-
-  const handleValueChange = async (foodItem) => {
-    if (foodItem != "Add New") {
-      const food = foods.find((food) => food.name === foodItem);
-      if (food) {
-        setitemName(foodItem);
-        setItemPrice(food.price);
-        setitemdescription(food.details);
-        setingredients(food.ingredients);
-        const person = food.person.toString();
-        setperson(person);
-        setduration(food.duration);
-        const categoryid = food.categoryid.toString();
-        setcategoryid(categoryid);
-        console.log(itemName);
-      } else {
-        console.log("no item found");
-      }
+  const handleSave = async () => {
+    if (foodDetails.id) {
+      // Update existing food
+      const foodDocRef = db.collection('Menu').doc(foodDetails.name);
+      await foodDocRef.update(foodDetails);
+      // Update your backend/database here
+      Alert.alert("Food Updated", "The food item has been updated successfully!");
     } else {
-      setitemName("");
-      setItemPrice("");
-      setitemdescription("");
-      setingredients("");
-      setperson("");
-      setduration("");
-      setcategoryid("");
-      console.log("Add new item");
+      // Add new food
+      const newFood = { ...foodDetails, id: foodDetails.length + 1 };
+      foods.push(newFood); // Update your backend/database here
+      Alert.alert("Food Added", "A new food item has been added successfully!");
     }
+    navigation.goBack();
   };
 
-  const handleSave = () => {
-    // Logic to save changes, update database, etc.
-    const food = foods.find((food) => food.name === itemName);
-    if (food) {
-      const updateditem = {
-        ...food,
-        price: itemPrice,
-        details: itemdescription,
-        ingredients: ingredients,
-        person: person,
-        duration: duration,
-        categoryid: categoryid,
-      };
-      console.log(updateditem);
-    } else {
-      console.log("Add new item");
-      const newid = foods.length + 1;
-      const newitem = {
-        id: newid,
-        name: itemName,
-        ingredients: ingredients,
-        price: itemPrice,
-        person: person,
-        duration: duration,
-        categoryid: categoryid,
-        details: itemdescription,
-      };
-
-      console.log(newitem);
-      foods.push(newitem);
-      foodItems123.push(newitem.name);
-    }
-
-    navigation.navigate("Manager_home");
-  };
-
-  const handleDelete = () => {
-    // Logic to delete item, update database, etc.
-    const food = foods.find((food) => food.name === itemName);
-    if (food) {
-      const index = foods.indexOf(food);
-
-      foods.splice(index, 1);
-      foodItems123.splice(index, 1);
-      const ids = foods.map((food) => food.id);
-
-      for (let i = index + 2; i < ids.length + 2; i++) {
-        console.log(i);
-        foods[i - 2].id = i - 1;
-      }
+  const handleDelete = async () => {
+    try {
+      // Delete from Firestore
+      await db.collection('Menu').doc(foodDetails.id).delete();
+  
+      // Update your local state if necessary
+      // For example, if you're maintaining a list of food items in the state
+      const updatedFoods = foods.filter(food => food.id !== foodDetails.id);
+      setFoods(updatedFoods);
+  
+      Alert.alert("Food Deleted", "The food item has been deleted successfully!");
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error deleting food item: ", error);
+      Alert.alert("Error", "Failed to delete the food item.");
     }
   };
-
+  
+  console.log(foodDetails)
   return (
-    <ScrollView style={{ marginLeft: 20, marginTop: 20 }}>
-      <Text>Select Item or add New</Text>
-      <Picker
-        selectedValue={itemName}
-        style={styles.select}
-        onValueChange={handleValueChange}
-      >
-        {foodItems123.map((foodItem) => (
-          <Picker.Item key={foodItem} label={foodItem} value={foodItem} />
-        ))}
-      </Picker>
-      <Image source={require("../../assets/add.png")} style={styles.image} />
+    <ScrollView style={styles.container}>
       <TextInput
-        placeholder="Item Name"
-        value={itemName}
-        onChangeText={setitemName}
-        style={styles.TextInput}
+        placeholder="Food Name"
+        value={foodDetails.name}
+        onChangeText={text => handleChange('name', text)}
+        style={styles.input}
       />
       <TextInput
-        placeholder="Ingredientes"
-        value={ingredients}
-        onChangeText={setingredients}
-        style={styles.TextInput}
+        placeholder="Ingredients"
+        value={foodDetails.ingredients}
+        onChangeText={text => handleChange('ingredients', text)}
+        multiline
+        style={[styles.input, styles.multiLineInput]}
       />
       <TextInput
-        placeholder="Item Price"
-        value={itemPrice}
-        onChangeText={setItemPrice}
-        style={styles.TextInput}
-      />
-      <TextInput
-        placeholder="Person"
-        value={person}
-        onChangeText={setperson}
-        style={styles.TextInput}
+        placeholder="Price"
+        value={String(foodDetails.price)} 
+        onChangeText={text => handleChange('price', text)}
+        keyboardType='numeric'
+        style={styles.input}
       />
       <TextInput
         placeholder="Duration"
-        value={duration}
-        onChangeText={setduration}
-        style={styles.TextInput}
+        value={foodDetails.duration}
+        onChangeText={text => handleChange('duration', text)}
+        style={styles.input}
       />
       <TextInput
-        placeholder="categoryid"
-        value={categoryid}
-        onChangeText={setcategoryid}
-        style={styles.TextInput}
+        placeholder="Details"
+        value={foodDetails.details}
+        onChangeText={text => handleChange('details', text)}
+        multiline
+        style={[styles.input, styles.multiLineInput]}
       />
-
-      <TextInput
-        placeholder="Item details"
-        value={itemdescription}
-        onChangeText={setitemdescription}
-        multiline={true}
-        style={{
-          height: 100,
-          textAlignVertical: "top",
-          width: 200,
-          borderColor: "gray",
-          borderWidth: 1,
-          marginBottom: 20,
-        }}
-      />
-
-      <Button title="Save " style={styles.save} onPress={handleSave} />
-      <Button title="Delete " style={styles.save} onPress={handleDelete} />
+      <View style={styles.buttonContainer}>
+        <View style={styles.button}>
+          <Button title="Save" onPress={handleSave} color="#4CAF50" />
+        </View>
+        {foodDetails.id && (
+          <View style={styles.button}>
+            <Button title="Delete" onPress={handleDelete} color="#F44336" />
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  containeer: {
+  container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "top",
+    backgroundColor: '#fff',
+    padding: 20,
+    paddingVertical:180
   },
-  image: {
-    width: 100,
-    height: 100,
-    paddingBottom: 20,
-    paddingTop: 20,
-  },
-  TextInput: {
-    height: 40,
-    width: 200,
-    borderColor: "gray",
+  input: {
     borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 15,
     marginBottom: 20,
+    borderRadius: 10,
+    fontSize: 16,
+    backgroundColor: '#f7f7f7',
   },
-  save: {
-    width: 100,
-    height: 100,
-    paddingBottom: 20,
+  multiLineInput: {
+    minHeight: 120,
+    textAlignVertical: 'top',
   },
-  select: {
-    width: 300,
-    height: 200,
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+    borderRadius: 5,
+    overflow: 'hidden',
   },
 });
 
-export default Manager_edit_menue;
+export default ManagerEditMenu;

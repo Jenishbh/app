@@ -3,7 +3,7 @@ import React, {useState,useEffect} from 'react'
 import {SecondButton} from '../../components/Button'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import { icons } from '../Menu/food'
-//import {db} from '../../database/firebase'
+import {db} from '../../database/firebase'
 //import { getAuth } from "firebase/auth";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,8 +15,9 @@ const DetailsScreen = ({navigation, route})=>{
     const item = route.params;
     //const auth = getAuth();
     //const user = auth.currentUser;
-
     
+
+
     
     const addToCart = async (itemToAdd) => {
         try {
@@ -73,7 +74,7 @@ const DetailsScreen = ({navigation, route})=>{
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 
                 <View style={styles.imageContainer}>
-                    <Image source={item.image} style={styles.image} />
+                    <Image source={{ uri: item.image }} style={styles.image} />
                 </View>
                 
                 <View style={styles.details}>
