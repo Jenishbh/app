@@ -43,7 +43,7 @@ import Confirm_res from "../screens/Customer/Confirm_res";
 import LiveTable from "../screens/Manager/LiveTable";
 import TableDetailsScreen from "../screens/Manager/TableDetails";
 import OrderSubmit from "../screens/Customer/OrderSubmit";
-
+import RevenueDashboard from "../screens/Manager/RevenueDashboard";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -210,12 +210,19 @@ const AuthNavigator = () => (
   <Stack.Navigator>
 
 
+
+
+
 <Stack.Screen
       name="Manager_home"
       component={Manage_BottomNavigator}
       options={{ headerShown: false }}
     />
-
+<Stack.Screen
+      name="RevenueDashboard"
+      component={RevenueDashboard}
+      options={{ headerShown: false }}
+    />
 
     <Stack.Screen
       name="Signin"
@@ -363,6 +370,7 @@ const AuthNavigator = () => (
       component={ManagerEditMenu}
       options={{ headerShown: false }}
     />
+
   </Stack.Navigator>
 );
 
