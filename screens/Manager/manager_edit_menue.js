@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
-import { View, Button, TextInput, ScrollView, StyleSheet, Alert, TouchableOpacity, Image, SafeAreaView } from 'react-native';
-import { categories, foods } from '../Menu/food'; // Adjust the path as needed
+import React, { useState, useEffect } from 'react';
+import { View, Button, TextInput, ScrollView, StyleSheet, Alert, TouchableOpacity, Image, SafeAreaView, ActivityIndicator , KeyboardAvoidingView, Platform  } from 'react-native';
+
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../../database/firebase';
+import RNPickerSelect from 'react-native-picker-select';
+
+
 const ManagerEditMenu = ({ route, navigation }) => {
   const initialFood = route.params || {};
   const [foodDetails, setFoodDetails] = useState(initialFood);
-  
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const categorySnapshot = await db.collection('Category').get();
+        const fetchedCategories = categorySnapshot.docs.map(doc => ({
+          label: doc.data().name,
+          value: doc.id
+        }));
+        setCategories(fetchedCategories);
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch categories.");
+      }
+      setLoading(false);
+    };
+    fetchCategories();
+  }, []);
   const handleChange = (name, value) => {
     setFoodDetails(prevDetails => ({ ...prevDetails, [name]: value }));
   };
@@ -26,74 +49,93 @@ const ManagerEditMenu = ({ route, navigation }) => {
   };
 
  
+  const handleSave = async () => {
+    if (foodDetails.image && !foodDetails.image.startsWith('http')) {
+      const blob = await (await fetch(foodDetails.image)).blob();
+      const storageRef = storage.ref().child('food/' + `image_${Date.now()}`);
+      const uploadTask = await storageRef.put(blob);
+      const downloadURL = await uploadTask.ref.getDownloadURL();
+      setFoodDetails({ ...foodDetails, image: downloadURL });
+    }
+    
+    // Save or update the food item
+    const foodDocRef = db.collection('Menu').doc(foodDetails.name);
+    const method = foodDetails.id ? 'update' : 'set';
+    await foodDocRef[method]({ ...foodDetails, id: foodDetails.id || Date.now() });
+    
+    Alert.alert("Success", `Food item ${foodDetails.id ? 'updated' : 'added'} successfully!`);
+    navigation.goBack();
+  };
+  
   const handleImageUpload = async (uri) => {
     try {
       
       const response = await fetch(uri.uri);
-      
-      
       const blob = await response.blob();
-      
       const storageRef = storage.ref().child('food/' + `image_${Date.now()}`);
-      
       const uploadTask = await storageRef.put(blob);
       const downloadURL = await uploadTask.ref.getDownloadURL();
       console.log(downloadURL)
-      updateFirestoreImageLink(downloadURL);
+      // Update the foodDetails with the new image URL
+      setFoodDetails({ ...foodDetails, image: downloadURL });
+  
+      // Proceed to save or update the food item details
+      saveOrUpdateFoodItem();
     } catch (error) {
       console.error("Error during the image upload process: ", error);
       Alert.alert('Error', 'Failed to upload image: ' + error.message);
     }
   };
   
-  
-  const updateFirestoreImageLink = async (downloadURL) => {
+  const saveOrUpdateFoodItem = async () => {
     try {
-      await db.collection('Menu').doc(foodDetails.name).update({ image: downloadURL });
-      setFoodDetails({ ...foodDetails, image: downloadURL });
-      Alert.alert('Success', 'Image updated successfully.');
-    } catch (error) {
-      console.error("Error updating Firestore: ", error);
-      Alert.alert('Error', 'Failed to update image in Firestore.');
-    }
-  };
-  const handleSave = async () => {
-    if (foodDetails.id) {
-      // Update existing food
+      // Reference to the document with the name as the key
       const foodDocRef = db.collection('Menu').doc(foodDetails.name);
-      await foodDocRef.update(foodDetails);
-      // Update your backend/database here
-      Alert.alert("Food Updated", "The food item has been updated successfully!");
-    } else {
-      // Add new food
-      const newFood = { ...foodDetails, id: foodDetails.length + 1 };
-      foods.push(newFood); // Update your backend/database here
-      Alert.alert("Food Added", "A new food item has been added successfully!");
+  
+      if (foodDetails.id) {
+        // Update existing food item
+        await foodDocRef.update(foodDetails);
+        Alert.alert("Food Updated", "The food item has been updated successfully!");
+      } else {
+        // Add new food item
+        await foodDocRef.set({ ...foodDetails, id: foodDetails.name }); // Assuming name is unique
+        Alert.alert("Food Added", "A new food item has been added successfully!");
+      }
+    } catch (error) {
+      console.error("Error in saveOrUpdate the food") }
+
     }
-    navigation.goBack();
-  };
+  
+  
 
   const handleDelete = async () => {
     try {
-      // Delete from Firestore
-      await db.collection('Menu').doc(foodDetails.id).delete();
-  
-      // Update your local state if necessary
-      // For example, if you're maintaining a list of food items in the state
-      const updatedFoods = foods.filter(food => food.id !== foodDetails.id);
-      setFoods(updatedFoods);
-  
+      if (foodDetails.image && foodDetails.image.startsWith('http')) {
+        const imageRef = storage.refFromURL(foodDetails.image);
+        console.log(imageRef)
+        await imageRef.delete();
+      }
+      
+      await db.collection('Menu').doc(foodDetails.name).delete();
       Alert.alert("Food Deleted", "The food item has been deleted successfully!");
       navigation.goBack();
     } catch (error) {
-      console.error("Error deleting food item: ", error);
+      console.error("Error: ", error);
       Alert.alert("Error", "Failed to delete the food item.");
     }
   };
   
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1, justifyContent: 'center' }} />;
+  }
   
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
+    <ScrollView style={styles.container}>
        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
         
       <Image source={{ uri: foodDetails.image }} style={styles.image} />
@@ -106,6 +148,12 @@ const ManagerEditMenu = ({ route, navigation }) => {
         onChangeText={text => handleChange('name', text)}
         style={styles.input}
       />
+        <RNPickerSelect
+          onValueChange={(value) => setFoodDetails({ ...foodDetails, category: value })}
+          items={categories}
+          style={styles.picker}
+          placeholder={{ label: 'Select a category', value: null }}
+        />
       <TextInput
         placeholder="Ingredients"
         value={foodDetails.ingredients}
@@ -143,7 +191,8 @@ const ManagerEditMenu = ({ route, navigation }) => {
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -152,7 +201,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20,
-    paddingVertical:180,
+    paddingVertical:34
+    
     
   },
   image: {
@@ -164,6 +214,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 200,
+},
+picker:{
+  borderWidth: 1,
+  borderColor: '#ddd',
+  padding: 15,
+  marginBottom: 20,
+  borderRadius: 10,
+  fontSize: 16,
+  backgroundColor: '#f7f7f7',
 },
   input: {
     borderWidth: 1,
