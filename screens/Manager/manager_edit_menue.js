@@ -20,21 +20,25 @@ const ManagerEditMenu = ({ route, navigation }) => {
     });
 
     if (!result.cancelled) {
-      handleImageUpload(result.uri);
+      handleImageUpload(result.assets[0]);
+      
     }
   };
 
+ 
   const handleImageUpload = async (uri) => {
     try {
-      const response = await fetch(uri);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      
+      const response = await fetch(uri.uri);
+      
+      
       const blob = await response.blob();
+      
       const storageRef = storage.ref().child('food/' + `image_${Date.now()}`);
-  
+      
       const uploadTask = await storageRef.put(blob);
       const downloadURL = await uploadTask.ref.getDownloadURL();
+      console.log(downloadURL)
       updateFirestoreImageLink(downloadURL);
     } catch (error) {
       console.error("Error during the image upload process: ", error);
@@ -45,7 +49,7 @@ const ManagerEditMenu = ({ route, navigation }) => {
   
   const updateFirestoreImageLink = async (downloadURL) => {
     try {
-      await db.collection('Menu').doc(foodDetails.id).update({ image: downloadURL });
+      await db.collection('Menu').doc(foodDetails.name).update({ image: downloadURL });
       setFoodDetails({ ...foodDetails, image: downloadURL });
       Alert.alert('Success', 'Image updated successfully.');
     } catch (error) {
