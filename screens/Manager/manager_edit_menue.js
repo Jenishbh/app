@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Button, TextInput, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Button, TextInput, ScrollView, StyleSheet, Alert, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { categories, foods } from '../Menu/food'; // Adjust the path as needed
-import { db } from '../../database/firebase';
+import * as ImagePicker from 'expo-image-picker';
+import { db, storage } from '../../database/firebase';
 const ManagerEditMenu = ({ route, navigation }) => {
   const initialFood = route.params || {};
   const [foodDetails, setFoodDetails] = useState(initialFood);
@@ -10,6 +11,48 @@ const ManagerEditMenu = ({ route, navigation }) => {
     setFoodDetails(prevDetails => ({ ...prevDetails, [name]: value }));
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      handleImageUpload(result.uri);
+    }
+  };
+
+  const handleImageUpload = async (uri) => {
+    try {
+      const response = await fetch(uri);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const storageRef = storage.ref().child('food/' + `image_${Date.now()}`);
+  
+      const uploadTask = await storageRef.put(blob);
+      const downloadURL = await uploadTask.ref.getDownloadURL();
+      updateFirestoreImageLink(downloadURL);
+    } catch (error) {
+      console.error("Error during the image upload process: ", error);
+      Alert.alert('Error', 'Failed to upload image: ' + error.message);
+    }
+  };
+  
+  
+  const updateFirestoreImageLink = async (downloadURL) => {
+    try {
+      await db.collection('Menu').doc(foodDetails.id).update({ image: downloadURL });
+      setFoodDetails({ ...foodDetails, image: downloadURL });
+      Alert.alert('Success', 'Image updated successfully.');
+    } catch (error) {
+      console.error("Error updating Firestore: ", error);
+      Alert.alert('Error', 'Failed to update image in Firestore.');
+    }
+  };
   const handleSave = async () => {
     if (foodDetails.id) {
       // Update existing food
@@ -44,9 +87,15 @@ const ManagerEditMenu = ({ route, navigation }) => {
     }
   };
   
-  console.log(foodDetails)
+  
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
+       <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+        
+      <Image source={{ uri: foodDetails.image }} style={styles.image} />
+
+      </TouchableOpacity>
+
       <TextInput
         placeholder="Food Name"
         value={foodDetails.name}
@@ -57,8 +106,8 @@ const ManagerEditMenu = ({ route, navigation }) => {
         placeholder="Ingredients"
         value={foodDetails.ingredients}
         onChangeText={text => handleChange('ingredients', text)}
-        multiline
-        style={[styles.input, styles.multiLineInput]}
+        
+        style={[styles.input,]}
       />
       <TextInput
         placeholder="Price"
@@ -90,7 +139,7 @@ const ManagerEditMenu = ({ route, navigation }) => {
           </View>
         )}
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -99,8 +148,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20,
-    paddingVertical:180
+    paddingVertical:180,
+    
   },
+  image: {
+    height: 180,
+        width: 180,
+        borderRadius: 30
+  },
+  imageContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+},
   input: {
     borderWidth: 1,
     borderColor: '#ddd',

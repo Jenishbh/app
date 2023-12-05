@@ -21,7 +21,7 @@ import Manager_home from "../screens/Manager/manager_home";
 import QRScannerScreen from "../screens/Manager/QRScannerScreen";
 import DetailsScreen from "../screens/Customer/detailsScreen";
 import OnBording from "../screens/Customer/OnBording";
-
+import MenuUpdateHome from "../screens/Manager/MenuUpdateHome";
 import Profile from "../screens/Customer/Profile";
 
 import Otp from "../screens/Welcome/Otp";
@@ -37,7 +37,7 @@ import ManagerMenu from "../screens/Manager/ManagerMenu";
 import ManagerCart from "../screens/Manager/ManagerCart";
 import CheckoutScreen from "../screens/Manager/Checkout";
 import BufferScreen from "../screens/Manager/Buffer";
-
+import ManagerEditMenu from '../screens/Manager/manager_edit_menue'
 import CartScreen from "../screens/Customer/CartScreen";
 import Confirm_res from "../screens/Customer/Confirm_res";
 import LiveTable from "../screens/Manager/LiveTable";
@@ -150,7 +150,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
       />
       <Tab.Screen
         name="EditMenu"
-        component={Manager_home}
+        component={MenuUpdateHome}
         options={{
           tabBarIcon: () => <Icon name="edit"  size={28} />,
           headerShown: false,
@@ -171,7 +171,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
                 borderColor: "orange",
                 borderWidth: 2,
                 borderRadius: 30,
-                top: -25,
+                top: -5,
                 elevation: 5,
               }}
             >
@@ -358,7 +358,11 @@ const AuthNavigator = () => (
       component={AssignTable}
       options={{ headerShown: false }}
     />
-
+        <Stack.Screen
+      name="ManagerEditMenu"
+      component={ManagerEditMenu}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 
