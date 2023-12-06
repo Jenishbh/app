@@ -55,6 +55,7 @@ const BottomNavigator = ({ navigation }) => {
           height: 55,
           borderTopWidth: 0,
           elevation: 0,
+          
         },
         showLabel: false,
         activeTintColor: "orange",
@@ -129,12 +130,16 @@ const BottomNavigator = ({ navigation }) => {
 
 const Manage_BottomNavigator = ({ navigation }) => {
   return (
+    
     <Tab.Navigator
+    initialRouteName="Home"
       tabBarOption={{
+        
         style: {
-          height: 55,
+          
           borderTopWidth: 0,
           elevation: 0,
+          
         },
         showLabel: false,
         activeTintColor: "orange",
@@ -157,7 +162,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
         }}
       />
       <Tab.Screen
-        name="QR scanner"
+        name="Home"
         component={Manager_home}
         options={{
           tabBarIcon: (color) => (
@@ -175,7 +180,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
                 elevation: 5,
               }}
             >
-              <Icon name="qr-code" color={color} size={28} />
+              <Icon name="home" color={color} size={28} />
             </View>
           ),
           headerShown: false,

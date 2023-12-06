@@ -11,10 +11,50 @@ import {
   TouchableOpacity,
   Button,
 } from "react-native";
-
+import TableManagementScreen from "./TableSelectionScreen";
+import { db } from "../../database/firebase";
 
 
 export default function Manager_home({ navigation }) {
+  const [tables, setTables] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true; // To handle component unmount
+  
+    const fetchData = async () => {
+      const fetchedTables = [];
+      const snapshot = await db.collection('Tables').get();
+  
+      for (const doc of snapshot.docs) {
+        const tableData = { id: doc.id, ...doc.data() };
+        const reservationsSnapshot = await doc.ref.collection('Reservation').get();
+        tableData.Reservation = reservationsSnapshot.docs.map(resDoc => ({
+          id: resDoc.id,
+          ...resDoc.data()
+        }));
+        
+        fetchedTables.push(tableData);
+      }
+  
+      if (isMounted) {
+        setTables(fetchedTables);
+      }
+    };
+  
+    fetchData();
+  
+    return () => {
+      isMounted = false; // Set it to false when the component unmounts
+    };
+  }, []);
+  // This line is already in your code and correctly filters the tables
+const occupiedTables = tables.filter(table => 
+  table.Reservation.some(res => res.status === 'confirmed')
+);
+
+// Count of occupied tables
+const occupiedTableCount = occupiedTables.length;
+
   const buttonClickedHandler = () => {
     console.log("oh !You have press the switch!");
     navigation.navigate("Table_view");
@@ -46,14 +86,14 @@ export default function Manager_home({ navigation }) {
       />
       <Text style={styles.check_in}> Checked-In </Text>
       <TouchableOpacity
-        onPress={buttonClickedHandler}
+        onPress={()=> navigation.navigate('LiveTable')}
         style={styles.roundButton1}
       >
-        <Text style={styles.number}>4/12</Text>
+        <Text style={styles.number}>{occupiedTableCount}/12</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={{ top: 160 }}
+        style={{ top: 180 }}
         onPress={() => {
           navigation.navigate("QRScannerScreen");
         }}
@@ -62,21 +102,12 @@ export default function Manager_home({ navigation }) {
           source={require("../../assets/qr-code-scan-icon.png")}
           style={styles.scanIcon}
         />
+        
 
       </TouchableOpacity>
+      
 
-      <View style={styles.switchContainer}>
-        <Text style={styles.onoff}>Slide to Turn On/Off Pre-check-In</Text>
-        <Switch
-          trackColor={{ false: "#767577", true: "#767577" }}
-          thumbColor={isEnabled ? "#0BF10B" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          activeText={"On"}
-          inActiveText={"Off"}
-          value={isEnabled}
-        />
-      </View>
+
 
     </SafeAreaView>
   );
