@@ -15,6 +15,7 @@ const [dateRange, setDateRange] = useState({ start: oneYearAgo, end: now });
 const [selectedRange, setSelectedRange] = useState('year');
 
     const [isLoading, setIsLoading] = useState(false);
+    const [totalRevenue, setTotalRevenue] = useState(0);
 
 
     const [topTrendingDishes, setTopTrendingDishes] = useState([]);
@@ -86,28 +87,35 @@ const [selectedRange, setSelectedRange] = useState('year');
     // Sorting and getting top dishes by frequency
     const sortedFrequencyDishes = Object.entries(dishFrequency)
         .sort((a, b) => b[1] - a[1]) // Sort by frequency (count)
-        .slice(0, 5) // Get top 5
+        .slice(0, 3) // Get top 5
         .map(dish => ({ name: dish[0], count: dish[1] }));
 
     // Sorting and getting top dishes by revenue
     const sortedRevenueDishes = Object.entries(dishRevenue)
         .sort((a, b) => b[1] - a[1]) // Sort by revenue
-        .slice(0, 5) // Get top 5
+        .slice(0, 3) // Get top 5
         .map(dish => ({ name: dish[0], revenue: dish[1].toFixed(2) }));
 
     setTopTrendingDishes(sortedFrequencyDishes);
     setTopRevenueDishes(sortedRevenueDishes);
 };
 
-  const renderListItem = ({ item  }) =>{ 
-    console.log(item)
-    return(
-    
-    <View style={styles.listItem}>
-      <Text style={styles.listItemText}>{item.name}</Text>
-      <Text style={styles.listItemSubText}>{`Count: ${item.count || ''} Revenue: $${item.revenue || ''}`}</Text>
-    </View>
-  )};
+const renderListItem = ({ item }) => {
+    return (
+      <View style={styles.listItem}>
+        <Text style={styles.listItemText}>{item.name}</Text>
+        <View>
+          {item.count !== undefined && (
+            <Text style={styles.listItemSubText}>Count: {item.count}</Text>
+          )}
+          {item.revenue !== undefined && (
+            <Text style={styles.listItemSubText}>Revenue: ${item.revenue}</Text>
+          )}
+        </View>
+      </View>
+    );
+  };
+  
   // Assuming your data has fields like `amount`, `date`, and `foodItem`
   const renderTimeRangeButtons = () => (
     <View style={styles.timeRangeContainer}>
@@ -170,7 +178,7 @@ const [selectedRange, setSelectedRange] = useState('year');
       .map(([email, amount]) => ({ email, amount: amount.toFixed(2) }));
   
     setMostValuableCustomers(sortedCustomers);
-    console.log(sortedCustomers)
+    
   };
 
   const renderMostValuableCustomers = () =>{ 
@@ -193,6 +201,8 @@ const [selectedRange, setSelectedRange] = useState('year');
   const processChartData = (fetchedData) => {
     let countData = {};
     let revenueData = {};
+    let totalRevenue = 0;
+
   
     fetchedData.forEach(item => {
       let dishName = item.name;
@@ -203,22 +213,32 @@ const [selectedRange, setSelectedRange] = useState('year');
       revenueData[dishName] = (revenueData[dishName] || 0) + totalRevenue;
     });
   
-    const countLabels = Object.keys(countData);
-    const countValues = countLabels.map(name => countData[name]);
+    // Sort and pick the top 4 dishes based on count
+    const sortedCountLabels = Object.keys(countData).sort((a, b) => countData[b] - countData[a]).slice(0, 4);
+    const countValues = sortedCountLabels.map(name => countData[name]);
   
-    const revenueLabels = Object.keys(revenueData);
-    const revenueValues = revenueLabels.map(name => revenueData[name]);
-  
+    // Sort and pick the top 4 dishes based on revenue
+    const sortedRevenueLabels = Object.keys(revenueData).sort((a, b) => revenueData[b] - revenueData[a]).slice(0, 4);
+    const revenueValues = sortedRevenueLabels.map(name => revenueData[name]);
+    
+    for (const value in revenueData) {
+        totalRevenue += revenueData[value];
+      }
+      setTotalRevenue(totalRevenue)
+      
     setChartData({
-      count: { labels: countLabels, datasets: [{ data: countValues }] },
-      revenue: { labels: revenueLabels, datasets: [{ data: revenueValues }] }
+      count: { labels: sortedCountLabels, datasets: [{ data: countValues }] },
+      revenue: { labels: sortedRevenueLabels, datasets: [{ data: revenueValues }] },
+      
+      
     });
+    
   };
   
   
  
 
-  
+
 
   
 
@@ -232,37 +252,54 @@ const [selectedRange, setSelectedRange] = useState('year');
     return items.map((item, index) => renderListItem({ item, key: item.name + index }));
   };
   
-  // Render method for the chart
+  const formatLabel = (label) => {
+    if (label.length > 10) { // Abbreviate if the label is too long
+      return label.substring(0, 8) + '...';
+    }
+    return label;
+  };
+  
   const renderChart = (data, chartType) => {
     if (!data || data.datasets[0].data.length === 0) {
       return <Text>No data for this period</Text>;
     }
+  
+    const formattedLabels = data.labels.map(label => formatLabel(label));
     const dataValues = data.datasets[0].data.flat();
   
     const chartData = {
-      labels: data.labels,
+      labels: formattedLabels,
       datasets: [{ data: dataValues }],
+      
     };
+
   
     return (
+        <View>
       <BarChart
         data={chartData}
-        width={300} // from react-native
-        height={220}
+        width={320} // from react-native
+        height={260}
         yAxisLabel={chartType === 'count' ? '' : '$'}
         chartConfig={{
           backgroundColor: '#e26a00',
           backgroundGradientFrom: '#fb8c00',
           backgroundGradientTo: '#ffa726',
-          decimalPlaces: 1,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          decimalPlaces: chartType === 'count' ? 0 : 1,
+          color: (opacity = 1) => `rgba(255, 255, 250, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
           style: { borderRadius: 16 },
         }}
         fromZero={true}
         
-        style={{ marginVertical: 8, borderRadius: 16 }}
+        style={{  borderRadius: 16 }}
       />
+        {/* Display total revenue */}
+        {chartData.revenue && renderChart(chartData.revenue, 'revenue')}
+  <View style={styles.revenueContainer}>
+    <Text style={styles.revenueText}>Total Revenue: ${totalRevenue.toFixed(2)}</Text>
+  </View>
+      </View>
     );
   };
   
@@ -277,7 +314,7 @@ const [selectedRange, setSelectedRange] = useState('year');
       ListHeaderComponent={
         <>
           {/* App Logo and Header */}
-          <Image source={require('../../assets/third.png')} style={{width:120, height:120, justifyContent:'center', alignSelf:'center'}}/>
+          <Image source={require('../../assets/third.png')} style={{width:150, height:150, justifyContent:'center', alignSelf:'center', marginTop:18, }}/>
   
           {/* Swipable Charts */}
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={true} pagingEnabled>
@@ -356,6 +393,16 @@ const styles = StyleSheet.create({
         
         // Add more styles for chart box
       },
+      revenueContainer: {
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      revenueText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        // other styling as needed
+      },
       separator: {
         height: 1,
         backgroundColor: '#ddd',
@@ -384,7 +431,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   listItem: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#e6e6e6',
     padding: 10,
     marginVertical: 5,
     marginHorizontal: 15,

@@ -86,12 +86,7 @@ const ManagerCart = ({navigation, route})=>{
 
     }
 
-    const handleupdate = async () => {
 
-        
-        navigation.navigate('ManagerEditMenu', item);
-
-    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -153,9 +148,7 @@ const ManagerCart = ({navigation, route})=>{
                         <SecondButton title='Add to Cart' btnContainer={styles.addButton} onPress={handlebook} />
                         
                     </View>
-                    <View style={styles.buttonContainer}>
-                    <SecondButton title='Update' btnContainer={styles.addButton} onPress={handleupdate} />
-                    </View>
+
                 </View>
 
             </ScrollView>
