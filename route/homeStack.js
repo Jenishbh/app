@@ -218,7 +218,14 @@ const AuthNavigator = () => (
 
 
 
-<Stack.Screen
+
+
+    <Stack.Screen
+      name="Signin"
+      component={Login}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
       name="Manager_home"
       component={Manage_BottomNavigator}
       options={{ headerShown: false }}
@@ -226,12 +233,6 @@ const AuthNavigator = () => (
 <Stack.Screen
       name="RevenueDashboard"
       component={RevenueDashboard}
-      options={{ headerShown: false }}
-    />
-
-    <Stack.Screen
-      name="Signin"
-      component={Login}
       options={{ headerShown: false }}
     />
     <Stack.Screen
