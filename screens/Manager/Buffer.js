@@ -35,11 +35,19 @@ const BufferScreen = () => {
     }
   };
 
+  const food ={
+    foodDetails: foodItems,
+    tableRef: udata.tableRef,
+    timestamp: new Date(),
+    totalAmount: udata.totalAmount,
+    userEmail: udata.email
+  }
 
 
   const handleDone = async () => {
     // Remove reservation from client and table side
     try {
+      await db.collection('FoodHistory').doc().set(food)
       // Example: Remove reservation code here
       //keeping user side reservation as it is
       //await db.collection('UserData').doc(udata.email).collection('Reservation').doc(udata.reservationId).delete();

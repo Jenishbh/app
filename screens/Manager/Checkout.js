@@ -45,7 +45,23 @@ const CheckoutScreen = ({ navigation, route }) => {
   const tipAmount = selectedTipPercentage ? subtotal * (selectedTipPercentage / 100) : parseFloat(customTip) || 0;
   const total = subtotal + tipAmount;
 
-
+  const updateTotalInUserData = async () => {
+    try {
+      // Assuming udata is already set in the state
+      const updatedUdata = { ...udata, totalAmount: total };
+  
+      // Store the updated user data in AsyncStorage
+      await AsyncStorage.setItem('@UserStorage', JSON.stringify(updatedUdata));
+  
+      // Update the state
+      setudata(updatedUdata);
+  
+      console.log('Total amount updated in user data');
+    } catch (error) {
+      console.error('Failed to update total in user data', error);
+      Alert.alert('Error', 'Failed to update total amount');
+    }
+  };
   // Function to handle the checkout process
 
   const saveScreenshot = async () => {
@@ -73,7 +89,7 @@ const CheckoutScreen = ({ navigation, route }) => {
       await db.collection('UserData').doc(udata.email)
           .collection('Reservation').doc(udata.reservationId)
           .update({ receiptImageUrl: downloadURL });
-
+      await updateTotalInUserData()
       alert('Receipt saved to reservation!');
     } catch (error) {
       console.error("Failed to save screenshot", error);
