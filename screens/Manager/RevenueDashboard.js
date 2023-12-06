@@ -8,8 +8,14 @@ import Swiper from 'react-native-swiper';
 
 
 const RevenueDashboard = () => {
+  const now = new Date();
+const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+
+const [dateRange, setDateRange] = useState({ start: oneYearAgo, end: now });
+const [selectedRange, setSelectedRange] = useState('year');
+
     const [isLoading, setIsLoading] = useState(false);
-    const [dateRange, setDateRange] = useState({ start: new Date(), end: new Date() });
+
 
     const [topTrendingDishes, setTopTrendingDishes] = useState([]);
     const [topRevenueDishes, setTopRevenueDishes] = useState([]);
@@ -19,25 +25,48 @@ const RevenueDashboard = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const snapshot = await db.collection('FoodDetails')
-        .where('date', '>=', dateRange.start)
-        .where('date', '<=', dateRange.end)
-        .get();
-        console.log(snapshot)
-      const fetchedData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const snapshot = await db.collection('FoodHistory').get();
+      const items = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       
-      processChartData(fetchedData);
-      processTopDishesData(fetchedData);
-      processMostValuableCustomers(fetchedData);
+      filterDataByTimestamp(items); // New function to filter data
     } catch (error) {
       console.error('Error fetching data:', error);
     }
     setIsLoading(false);
   };
+  const filterDataByTimestamp = (items) => {
+    const filteredItems = items.filter(item => {
+      const itemDate = item.timestamp.toDate(); // Convert Firestore Timestamp to JavaScript Date
+      return itemDate >= dateRange.start && itemDate <= dateRange.end;
+    });
+  
+    if (filteredItems.length > 0) {
+      // Assuming all items have a similar structure and foodDetails is an array
+      const foodDetailsArray = filteredItems.map(item => item.foodDetails).flat();
+      
+      processChartData(foodDetailsArray);
+      processTopDishesData(foodDetailsArray);
+      processMostValuableCustomers(filteredItems);
+    } else {
+      // Handle the scenario where there are no filtered items
+      // You might want to reset your state or show a message
+      setTopTrendingDishes([]);
+      setTopRevenueDishes([]);
+      setMostValuableCustomers([]);
+      setChartData({});
+    }
+  };
+  
+  
   
   useEffect(() => {
+    setIsLoading(true);
     fetchData();
-  }, [dateRange]);
+  }, [dateRange]); // fetchData is called whenever dateRange changes
+  
 
 
   const processTopDishesData = (fetchedData) => {
@@ -45,56 +74,60 @@ const RevenueDashboard = () => {
     let dishRevenue = {};
 
     fetchedData.forEach(item => {
-      // Assuming `item.foodItem` is the name of the dish and `item.amount` is the revenue
-      dishFrequency[item.name] = (dishFrequency[item.name] || 0) + 1;
-      dishRevenue[item.name] = (dishRevenue[item.name] || 0) + parseFloat(item.salePrice);
+        let dishName = item.name;
+        let quantitySold = parseInt(item.qty, 10); // Parse qty as an integer
+        let totalRevenue = parseFloat(item.totalPrice); // Parse totalPrice as a float
+
+        // Update frequency and revenue for each dish
+        dishFrequency[dishName] = (dishFrequency[dishName] || 0) + quantitySold;
+        dishRevenue[dishName] = (dishRevenue[dishName] || 0) + totalRevenue;
     });
 
-    // Sorting and getting top dishes
+    // Sorting and getting top dishes by frequency
     const sortedFrequencyDishes = Object.entries(dishFrequency)
-      .sort((a, b) => b[1] - a[1]) // Sort by frequency
-      .slice(0, 5) // Get top 5
-      .map(dish => ({ name: dish[0], count: dish[1] }));
+        .sort((a, b) => b[1] - a[1]) // Sort by frequency (count)
+        .slice(0, 5) // Get top 5
+        .map(dish => ({ name: dish[0], count: dish[1] }));
 
+    // Sorting and getting top dishes by revenue
     const sortedRevenueDishes = Object.entries(dishRevenue)
-      .sort((a, b) => b[1] - a[1]) // Sort by revenue
-      .slice(0, 5) // Get top 5
-      .map(dish => ({ name: dish[0], revenue: dish[1].toFixed(2) }));
+        .sort((a, b) => b[1] - a[1]) // Sort by revenue
+        .slice(0, 5) // Get top 5
+        .map(dish => ({ name: dish[0], revenue: dish[1].toFixed(2) }));
 
     setTopTrendingDishes(sortedFrequencyDishes);
     setTopRevenueDishes(sortedRevenueDishes);
-  };
+};
 
-  const renderListItem = ({ item }) => (
+  const renderListItem = ({ item  }) =>{ 
+    console.log(item)
+    return(
+    
     <View style={styles.listItem}>
       <Text style={styles.listItemText}>{item.name}</Text>
       <Text style={styles.listItemSubText}>{`Count: ${item.count || ''} Revenue: $${item.revenue || ''}`}</Text>
     </View>
-  );
+  )};
   // Assuming your data has fields like `amount`, `date`, and `foodItem`
   const renderTimeRangeButtons = () => (
     <View style={styles.timeRangeContainer}>
       {['day', 'week', 'month', 'year'].map(range => (
-        <TouchableOpacity key={range} onPress={() => setSelectedRange(range)} style={styles.timeRangeButton}>
+        <TouchableOpacity 
+          key={range} 
+          onPress={() => handleRangeSelection(range)} 
+          style={[
+            styles.timeRangeButton, 
+            selectedRange === range ? styles.selectedTimeRangeButton : {}
+          ]}
+        >
           <Text>{range.toUpperCase()}</Text>
         </TouchableOpacity>
       ))}
     </View>
   );
-  const renderSwipableCharts = () => {
-    return (
-      <Swiper style={styles.wrapper} showsButtons={true}>
-        <View style={styles.slide}>
-          {renderChart()} 
-        </View>
-        <View style={styles.slide}>
-          
-        </View>
-       
-      </Swiper>
-    );
-  };
-  const setSelectedRange = (range) => {
+  
+  const handleRangeSelection = (range) => {
+    setSelectedRange(range);
     const now = new Date();
     let start = new Date();
     
@@ -116,11 +149,15 @@ const RevenueDashboard = () => {
     }
   
     setDateRange({ start, end: now });
-    fetchData(); // This will re-fetch the data based on the new date range
+    setIsLoading(true)
+    fetchData(); // Re-fetch data with the new date range
   };
+
+  
+
   const processMostValuableCustomers = (fetchedData) => {
     let customerSpending = {};
-  
+    
     fetchedData.forEach(item => {
       const customerKey = item.userEmail; // Replace with your identifier
       customerSpending[customerKey] = (customerSpending[customerKey] || 0) + parseFloat(item.totalAmount); // Replace 'totalAmount' with your field
@@ -133,115 +170,157 @@ const RevenueDashboard = () => {
       .map(([email, amount]) => ({ email, amount: amount.toFixed(2) }));
   
     setMostValuableCustomers(sortedCustomers);
+    console.log(sortedCustomers)
   };
 
-  const renderMostValuableCustomers = () => (
+  const renderMostValuableCustomers = () =>{ 
+    
+    
+    return(
     <FlatList
       data={mostValuableCustomers}
       renderItem={({ item }) => (
-        <View style={styles.customerItem}>
-          <Text>{item.name}</Text>
+        <View style={styles.listItem}>
+          <Text style={styles.listItemText}>{item.email}</Text>
+          <Text style={styles.listItemSubText}>${item.amount}</Text>
           {/* Display other customer details */}
         </View>
       )}
       keyExtractor={item => item.id}
     />
-  );
+  )};
   
   const processChartData = (fetchedData) => {
-    let revenuePerDay = {};
+    let countData = {};
+    let revenueData = {};
+  
     fetchedData.forEach(item => {
-      const dateStr = item.date.toISOString().split('T')[0]; // Adjust based on your date format
-      revenuePerDay[dateStr] = (revenuePerDay[dateStr] || 0) + parseFloat(item.amount); // Adjust 'amount' field based on your data
+      let dishName = item.name;
+      let quantitySold = parseInt(item.qty, 10);
+      let totalRevenue = parseFloat(item.totalPrice);
+  
+      countData[dishName] = (countData[dishName] || 0) + quantitySold;
+      revenueData[dishName] = (revenueData[dishName] || 0) + totalRevenue;
     });
   
-    const sortedDates = Object.keys(revenuePerDay).sort();
-    const labels = sortedDates;
-    const data = sortedDates.map(date => revenuePerDay[date]);
+    const countLabels = Object.keys(countData);
+    const countValues = countLabels.map(name => countData[name]);
   
-    setChartData({ labels, datasets: [{ data }] });
+    const revenueLabels = Object.keys(revenueData);
+    const revenueValues = revenueLabels.map(name => revenueData[name]);
+  
+    setChartData({
+      count: { labels: countLabels, datasets: [{ data: countValues }] },
+      revenue: { labels: revenueLabels, datasets: [{ data: revenueValues }] }
+    });
   };
   
+  
+ 
+
+  
+
   
 
   // Date change handler for date picker
-  const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    const currentDate = selectedDate || (isStartDate ? dateRange.start : dateRange.end);
-    setDateRange({
-      ...dateRange,
-      [isStartDate ? 'start' : 'end']: currentDate
-    });
-  };
 
+  const renderListOrMessage = (items, message) => {
+    if (items.length === 0) {
+      return <Text>{message}</Text>;
+    }
+  
+    return items.map((item, index) => renderListItem({ item, key: item.name + index }));
+  };
+  
   // Render method for the chart
-  const renderChart = () => {
+  const renderChart = (data, chartType) => {
+    if (!data || data.datasets[0].data.length === 0) {
+      return <Text>No data for this period</Text>;
+    }
+    const dataValues = data.datasets[0].data.flat();
+  
+    const chartData = {
+      labels: data.labels,
+      datasets: [{ data: dataValues }],
+    };
+  
     return (
       <BarChart
         data={chartData}
         width={300} // from react-native
         height={220}
-        yAxisLabel="$"
+        yAxisLabel={chartType === 'count' ? '' : '$'}
         chartConfig={{
           backgroundColor: '#e26a00',
           backgroundGradientFrom: '#fb8c00',
           backgroundGradientTo: '#ffa726',
-          decimalPlaces: 2, // optional, defaults to 2dp
+          decimalPlaces: 1,
           color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            borderRadius: 16
-          }
+          style: { borderRadius: 16 },
         }}
-        style={{
-          marginVertical: 8,
-          borderRadius: 16
-        }}
+        fromZero={true}
+        
+        style={{ marginVertical: 8, borderRadius: 16 }}
       />
     );
   };
-
+  
   return (
-    <SafeAreaView style={styles.container}>
-      {isLoading ? (
+    isLoading ? (
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <View>
+      </View>
+    ) : (
+    <FlatList
+      data={[]} // No data needed for the main list
+      ListHeaderComponent={
+        <>
           {/* App Logo and Header */}
+          <Image source={require('../../assets/third.png')} style={{width:120, height:120, justifyContent:'center', alignSelf:'center'}}/>
   
           {/* Swipable Charts */}
-          <View style={styles.chartContainer}>
-            {renderSwipableCharts()}
-          </View>
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={true} pagingEnabled>
+  <View style={styles.chartContainer}>
+    {/* Chart for Most Trending Dish by Count */}
+    <View style={styles.chartBox}>
+      {chartData.count && renderChart(chartData.count, 'count')}
+    </View>
+
+    {/* Chart for Most Trending Dish by Total Revenue */}
+    <View style={styles.chartBox}>
+      {chartData.revenue && renderChart(chartData.revenue, 'revenue')}
+    </View>
+  </View>
+</ScrollView>
+
+
   
           {/* Time Range Buttons */}
           <View style={styles.timeRangeContainer}>
             {renderTimeRangeButtons()}
           </View>
   
-          {/* Top Trending Dishes */}
-          <Text style={styles.sectionTitle}>Top Trending Dishes</Text>
-          <FlatList
-            data={topTrendingDishes}
-            renderItem={renderListItem}
-            keyExtractor={item => item.name}
-          />
-  
-          {/* Top Revenue Generating Dishes */}
-          <Text style={styles.sectionTitle}>Top Revenue Generating Dishes</Text>
-          <FlatList
-            data={topRevenueDishes}
-            renderItem={renderListItem}
-            keyExtractor={item => item.name}
-          />
-  
-          {/* Most Valuable Customers */}
-          <Text style={styles.sectionTitle}>Most Valuable Customers</Text>
-          {renderMostValuableCustomers()}
-        </View>
-      )}
-    </SafeAreaView>
+          {/* Top Trending Dishes Section */}
+<Text style={styles.sectionTitle}>Top Trending Dishes</Text>
+{renderListOrMessage(topTrendingDishes, 'No trending dishes for this period')}
+
+{/* Top Revenue Generating Dishes Section */}
+<Text style={styles.sectionTitle}>Top Revenue Generating Dishes</Text>
+{renderListOrMessage(topRevenueDishes, 'No revenue data for this period')}
+
+{/* Most Valuable Customers Section */}
+<Text style={styles.sectionTitle}>Most Valuable Customers</Text>
+{mostValuableCustomers.length === 0 ? <Text>No customer data for this period</Text> : renderMostValuableCustomers()}
+
+        </>
+      }
+      renderItem={null} // No items to render in the main list
+      keyExtractor={(item, index) => index.toString()}
+    />
+  )
   );
+  
   
 };
 
@@ -251,6 +330,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        marginTop:10,
+
+      },
+      loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff', // or any background color you prefer
       },
       logoContainer: {
         alignItems: 'center',
@@ -266,6 +353,7 @@ const styles = StyleSheet.create({
         padding: 20,
         marginHorizontal: 10,
         borderRadius: 10,
+        
         // Add more styles for chart box
       },
       separator: {
@@ -275,6 +363,7 @@ const styles = StyleSheet.create({
       },
       chartContainer: {
         // Style for the chart container
+        flexDirection: 'row',
         marginVertical: 20,
         paddingHorizontal: 10,
         alignItems: 'center',
@@ -284,6 +373,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         padding: 10,
+        
         // Other styles
       },
   sectionTitle: {
@@ -314,9 +404,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   timeRangeButton: {
-    padding: 10,
+    padding: 14,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
+    marginHorizontal:5
   },
   sectionTitle: {
     fontSize: 18,
@@ -326,7 +417,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    backgroundColor:'lightgray',
+    margin:10,
+    borderRadius:8
   },
+  selectedTimeRangeButton: {
+    backgroundColor: '#e26a00', // or any color to indicate selection
+    // other styles for selected button
+  },
+  
   // Add more styles as needed
 });
 

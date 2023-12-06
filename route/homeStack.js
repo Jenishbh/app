@@ -142,7 +142,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
     >
       <Tab.Screen
         name="Sales Dashboard"
-        component={Manager_home}
+        component={RevenueDashboard}
         options={{
           tabBarIcon: () => <Icon name="dashboard"  size={28} />,
           headerShown: false,
@@ -158,7 +158,7 @@ const Manage_BottomNavigator = ({ navigation }) => {
       />
       <Tab.Screen
         name="QR scanner"
-        component={QRScannerScreen}
+        component={Manager_home}
         options={{
           tabBarIcon: (color) => (
             <View

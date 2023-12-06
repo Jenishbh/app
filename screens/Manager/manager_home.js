@@ -58,6 +58,10 @@ export default function Manager_home({ navigation }) {
           navigation.navigate("QRScannerScreen");
         }}
       >
+        <Image
+          source={require("../../assets/qr-code-scan-icon.png")}
+          style={styles.scanIcon}
+        />
 
       </TouchableOpacity>
 

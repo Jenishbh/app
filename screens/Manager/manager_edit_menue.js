@@ -4,6 +4,7 @@ import { View, Button, TextInput, ScrollView, StyleSheet, Alert, TouchableOpacit
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../../database/firebase';
 import RNPickerSelect from 'react-native-picker-select';
+import { async } from '@firebase/util';
 
 
 const ManagerEditMenu = ({ route, navigation }) => {
@@ -28,6 +29,8 @@ const ManagerEditMenu = ({ route, navigation }) => {
       }
       setLoading(false);
     };
+
+
     fetchCategories();
   }, []);
   const handleChange = (name, value) => {
